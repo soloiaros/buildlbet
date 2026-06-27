@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Coins } from "lucide-react";
+import { fetchTeamPost } from "../api";
 import "./BetModal.css";
 
-export default function BetModal({ team, maxAmount, pending, error, onConfirm, onClose }) {
+export default function BetModal({ team, maxAmount, hasTeam, pending, error, onConfirm, onClose }) {
   const [amount, setAmount] = useState("");
+  const [post, setPost] = useState(null);
+  const [loadingPost, setLoadingPost] = useState(true);
 
   const numAmount = parseInt(amount) || 0;
   const isValid = numAmount > 0 && numAmount <= maxAmount;
@@ -24,6 +27,17 @@ export default function BetModal({ team, maxAmount, pending, error, onConfirm, o
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
+
+  // Fetch team post on open
+  useEffect(() => {
+    setLoadingPost(true);
+    fetchTeamPost(team.id)
+      .then((res) => {
+        if (res.hasPost) setPost(res.post);
+      })
+      .catch(console.error)
+      .finally(() => setLoadingPost(false));
+  }, [team.id]);
 
   return (
     <AnimatePresence>
@@ -56,6 +70,18 @@ export default function BetModal({ team, maxAmount, pending, error, onConfirm, o
             </div>
           </div>
 
+          {!loadingPost && post && (
+            <div className="modal-post-preview brutal-card">
+              {post.imageBase64 && <img src={post.imageBase64} alt="Project" />}
+              {post.text && <p>{post.text}</p>}
+            </div>
+          )}
+          {loadingPost && (
+            <div className="modal-post-loading">
+              <span className="spinner" style={{width: 16, height: 16, borderWidth: 2}} /> Loading project info...
+            </div>
+          )}
+
           <div className="modal-input-group">
             <Coins size={24} className="modal-input-icon" />
             <input
@@ -68,6 +94,7 @@ export default function BetModal({ team, maxAmount, pending, error, onConfirm, o
               max={maxAmount}
               autoFocus
               inputMode="numeric"
+              disabled={!hasTeam}
             />
           </div>
 
@@ -78,6 +105,7 @@ export default function BetModal({ team, maxAmount, pending, error, onConfirm, o
                 className="btn btn-secondary modal-preset-btn"
                 onClick={() => setAmount(String(val))}
                 type="button"
+                disabled={!hasTeam}
               >
                 {val === maxAmount ? "MAX" : val}
               </button>
@@ -87,17 +115,23 @@ export default function BetModal({ team, maxAmount, pending, error, onConfirm, o
           {error && <div className="modal-error">{error}</div>}
 
           <div className="modal-actions">
-            <button
-              className="btn btn-primary modal-confirm"
-              disabled={!isValid || pending}
-              onClick={() => onConfirm(numAmount)}
-            >
-              {pending ? (
-                <><span className="spinner" /> CONFIRMING...</>
-              ) : (
-                `BET ${numAmount || 0} TOKENS`
-              )}
-            </button>
+            {!hasTeam ? (
+              <button className="btn btn-primary modal-confirm" disabled>
+                JOIN A TEAM TO BET
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary modal-confirm"
+                disabled={!isValid || pending}
+                onClick={() => onConfirm(numAmount)}
+              >
+                {pending ? (
+                  <><span className="spinner" /> CONFIRMING...</>
+                ) : (
+                  `BET ${numAmount || 0} TOKENS`
+                )}
+              </button>
+            )}
           </div>
         </motion.div>
       </div>

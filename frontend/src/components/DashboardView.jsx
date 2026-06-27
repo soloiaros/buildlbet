@@ -1,4 +1,5 @@
-import { Zap, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Zap, TrendingUp, X } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -8,6 +9,8 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
+import { fetchRecentPosts } from "../api";
+import { motion, AnimatePresence } from "framer-motion";
 import "./DashboardView.css";
 
 const BAR_COLORS = [
@@ -27,6 +30,7 @@ const BrutalTooltip = ({ active, payload }) => {
         <div className="brutal-tooltip-name">{data.name}</div>
         <div className="brutal-tooltip-stat">Pool: <span>{data.pool}</span></div>
         <div className="brutal-tooltip-stat">Odds: <span>{data.odds > 0 ? `${data.odds}x` : "—"}</span></div>
+        <div className="brutal-tooltip-stat">Bettors: <span>{data.bettorCount || 0}</span></div>
       </div>
     );
   }
@@ -34,6 +38,36 @@ const BrutalTooltip = ({ active, payload }) => {
 };
 
 export default function DashboardView({ market }) {
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    const pollPosts = async () => {
+      try {
+        const posts = await fetchRecentPosts();
+        if (active) setRecentPosts(posts);
+      } catch (err) {
+        console.error("Failed to fetch recent posts:", err);
+      }
+    };
+    pollPosts();
+    const interval = setInterval(pollPosts, 5000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Close post modal on escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setSelectedPost(null);
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
   if (!market) {
     return (
       <div className="dashboard-container">
@@ -115,6 +149,37 @@ export default function DashboardView({ market }) {
         </ResponsiveContainer>
       </div>
 
+      {/* Recent Posts */}
+      {recentPosts.length > 0 && (
+        <div className="dashboard-recent-posts">
+          <h2 className="recent-posts-title">LATEST PROJECT POSTS</h2>
+          <div className="recent-posts-grid">
+            {recentPosts.map((post) => (
+              <div 
+                key={post.teamId} 
+                className="brutal-card recent-post-card"
+                onClick={() => setSelectedPost(post)}
+              >
+                <div className="recent-post-header">
+                  {post.teamName}
+                </div>
+                {post.imageBase64 && (
+                  <div 
+                    className="recent-post-thumb" 
+                    style={{ backgroundImage: `url(${post.imageBase64})` }} 
+                  />
+                )}
+                {post.text && (
+                  <p className="recent-post-snippet">
+                    {post.text.length > 60 ? post.text.slice(0, 60) + '...' : post.text}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Live indicator */}
       {!market.resolved && (
         <div className="dashboard-live brutal-card">
@@ -122,6 +187,34 @@ export default function DashboardView({ market }) {
           LIVE EVENT
         </div>
       )}
+
+      {/* Post Modal */}
+      <AnimatePresence>
+        {selectedPost && (
+          <div className="post-modal-overlay" onClick={() => setSelectedPost(null)}>
+            <motion.div 
+              className="brutal-card post-modal-content"
+              onClick={e => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            >
+              <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
+                <X size={24} strokeWidth={3} />
+              </button>
+              <h2 className="post-modal-title">{selectedPost.teamName}</h2>
+              {selectedPost.imageBase64 && (
+                <img src={selectedPost.imageBase64} alt="Project" className="post-modal-image" />
+              )}
+              {selectedPost.text && (
+                <p className="post-modal-text">{selectedPost.text}</p>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

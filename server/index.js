@@ -15,7 +15,7 @@ const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 // ── Config ──────────────────────────────────────────────────────────────
 
@@ -51,6 +51,40 @@ const walletSigners = demoWallets.map((w) => {
 
 // Track which wallets have been claimed (in-memory, resets on restart)
 const claimedWallets = new Set();
+
+// Track team posts (in-memory)
+// { teamId: { imageBase64, text, updatedAt } }
+const teamPosts = {};
+
+// Track distinct bettors per team
+const teamBettors = new Map(); // teamId -> Set<address>
+
+// Initialize past events and listen for new ones
+(async () => {
+  let lastCheckedBlock = await provider.getBlockNumber().catch(() => 0);
+
+  // Listen for live events using polling (since eth_newFilter is unsupported on this RPC)
+  setInterval(async () => {
+    try {
+      const latestBlock = await provider.getBlockNumber();
+      if (latestBlock <= lastCheckedBlock) return;
+      
+      const filter = readContract.filters.BetPlaced();
+      const newEvents = await readContract.queryFilter(filter, lastCheckedBlock + 1, latestBlock);
+      
+      newEvents.forEach((event) => {
+        const { bettor, teamId } = event.args;
+        const tId = Number(teamId);
+        if (!teamBettors.has(tId)) teamBettors.set(tId, new Set());
+        teamBettors.get(tId).add(bettor);
+      });
+      
+      lastCheckedBlock = latestBlock;
+    } catch (err) {
+      // Ignore transient RPC errors during polling
+    }
+  }, 4000);
+})();
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
@@ -220,11 +254,20 @@ app.post("/api/claim-payout", async (req, res) => {
   }
 });
 
+const rpcCache = {
+  market: { data: null, expires: 0 },
+  balance: {}
+};
+
 /**
  * GET /api/market
  * Returns full market state: teams, pools, odds, resolution status.
  */
 app.get("/api/market", async (req, res) => {
+  if (Date.now() < rpcCache.market.expires && rpcCache.market.data) {
+    return res.json(rpcCache.market.data);
+  }
+  
   try {
     const [resolved, winningTeamId, teamCount, totalPool] = await readContract.getMarketState();
     const [pools, names] = await readContract.getAllTeams();
@@ -237,18 +280,27 @@ app.get("/api/market", async (req, res) => {
         id: i,
         name: names[i],
         pool: pool,
-        odds: Math.round(odds * 10) / 10, // 1 decimal place
+        odds: Math.round(odds * 10) / 10,
+        bettorCount: teamBettors[i] ? teamBettors[i].size : 0,
+        hasPost: !!teamPosts[i]
       });
     }
 
-    return res.json({
+    const responseData = {
       resolved: resolved,
       winningTeamId: Number(winningTeamId),
       totalPool: Number(totalPool),
       teams: teams,
-    });
+    };
+    
+    rpcCache.market.data = responseData;
+    rpcCache.market.expires = Date.now() + 3000; // cache for 3s
+    
+    return res.json(responseData);
   } catch (err) {
     console.error("Market read error:", err.message);
+    // Fallback to cache if available
+    if (rpcCache.market.data) return res.json(rpcCache.market.data);
     return res.status(500).json({ error: "Failed to read market state" });
   }
 });
@@ -258,8 +310,14 @@ app.get("/api/market", async (req, res) => {
  * Returns the free balance and per-team bets for the given wallet.
  */
 app.get("/api/balance/:walletId", async (req, res) => {
+  const walletId = req.params.walletId;
+  
+  if (rpcCache.balance[walletId] && Date.now() < rpcCache.balance[walletId].expires) {
+    return res.json(rpcCache.balance[walletId].data);
+  }
+
   try {
-    const w = getWalletById(req.params.walletId);
+    const w = getWalletById(walletId);
     if (!w) {
       return res.status(400).json({ error: "Invalid wallet ID" });
     }
@@ -277,17 +335,86 @@ app.get("/api/balance/:walletId", async (req, res) => {
     const hasClaimed = await readContract.hasClaimed(w.address);
     const [hasTeam, teamId] = await readContract.getTeamMembership(w.address);
 
-    return res.json({
+    const responseData = {
       address: w.address,
       balance: Number(balance),
       bets: bets,
       hasClaimed: hasClaimed,
       hasTeam: hasTeam,
       teamId: hasTeam ? Number(teamId) : null,
-    });
+    };
+
+    rpcCache.balance[walletId] = {
+      data: responseData,
+      expires: Date.now() + 3000
+    };
+
+    return res.json(responseData);
   } catch (err) {
     console.error("Balance read error:", err.message);
+    if (rpcCache.balance[walletId]?.data) return res.json(rpcCache.balance[walletId].data);
     return res.status(500).json({ error: "Failed to read balance" });
+  }
+});
+
+/**
+ * POST /api/team-post
+ * Body: { walletId, imageBase64, text }
+ */
+app.post("/api/team-post", async (req, res) => {
+  try {
+    const { walletId, imageBase64, text } = req.body;
+    const w = getWalletById(walletId);
+    if (!w) return res.status(400).json({ error: "Invalid wallet ID" });
+
+    const [hasTeam, teamId] = await readContract.getTeamMembership(w.address);
+    if (!hasTeam) return res.status(403).json({ error: "Must belong to a team to post" });
+
+    const tId = Number(teamId);
+    teamPosts[tId] = {
+      teamId: tId,
+      imageBase64: imageBase64 || null,
+      text: text || "",
+      updatedAt: Date.now()
+    };
+
+    return res.json({ success: true, post: teamPosts[tId] });
+  } catch (err) {
+    console.error("Post error:", err);
+    return res.status(500).json({ error: "Failed to save post" });
+  }
+});
+
+/**
+ * GET /api/team-post/:teamId
+ */
+app.get("/api/team-post/:teamId", (req, res) => {
+  const tId = Number(req.params.teamId);
+  if (teamPosts[tId]) {
+    return res.json({ hasPost: true, post: teamPosts[tId] });
+  }
+  return res.json({ hasPost: false });
+});
+
+/**
+ * GET /api/recent-posts
+ */
+app.get("/api/recent-posts", async (req, res) => {
+  // Returns posts sorted by updatedAt, plus the team name
+  try {
+    const posts = Object.values(teamPosts).sort((a, b) => b.updatedAt - a.updatedAt);
+    
+    // Attach team names
+    const [, names] = await readContract.getAllTeams();
+    const enriched = posts.map(p => ({
+      ...p,
+      teamName: names[p.teamId]
+    }));
+
+    return res.json(enriched);
+  } catch (err) {
+    console.error("Fetch recent posts error:", err);
+    return res.status(500).json({ error: "Failed to fetch posts" });
   }
 });
 

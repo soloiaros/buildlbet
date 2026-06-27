@@ -62,6 +62,24 @@ export async function claimPayout(walletId) {
   });
 }
 
+/** Fetch a specific team's post */
+export async function fetchTeamPost(teamId) {
+  return request(`/api/team-post/${teamId}`);
+}
+
+/** Publish a team post */
+export async function publishTeamPost(walletId, imageBase64, text) {
+  return request("/api/team-post", {
+    method: "POST",
+    body: JSON.stringify({ walletId, imageBase64, text }),
+  });
+}
+
+/** Fetch all recent posts */
+export async function fetchRecentPosts() {
+  return request("/api/recent-posts");
+}
+
 /** Get full market state (teams, pools, odds, resolution) */
 export async function fetchMarket() {
   return request("/api/market");

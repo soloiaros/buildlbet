@@ -1,0 +1,156 @@
+.team-tab-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .team-tab-container {
+    padding-top: 100px; /* space for top nav */
+  }
+}
+
+.team-tab-header {
+  padding: 24px;
+  background: var(--accent-pink);
+  text-align: center;
+}
+
+.team-tab-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.team-stats-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  background: var(--bg-card);
+}
+
+.team-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-divider {
+  width: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
+.publish-card {
+  padding: 24px;
+  background: var(--accent-amber);
+}
+
+.publish-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.publish-subtitle {
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.publish-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.publish-textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-size: 1rem;
+}
+
+.publish-image-row {
+  display: flex;
+  gap: 8px;
+}
+
+.upload-btn {
+  flex: 1;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.clear-btn {
+  background: var(--accent-red) !important;
+  color: white !important;
+}
+
+.publish-preview img {
+  width: 100%;
+  max-width: 400px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  display: block;
+  margin: 0 auto;
+}
+
+.publish-submit {
+  padding: 16px;
+  font-size: 1.2rem;
+}
+
+.publish-error {
+  background: #FFF0F0;
+  color: var(--accent-red);
+  border: 2px solid var(--accent-red);
+  padding: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.current-post-card {
+  padding: 24px;
+  background: var(--bg-card);
+  text-align: center;
+}
+
+.current-post-title {
+  font-weight: 900;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  color: var(--accent-green);
+}
+
+.current-post-image {
+  width: 100%;
+  max-width: 600px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.current-post-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+}

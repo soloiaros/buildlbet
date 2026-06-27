@@ -232,6 +232,7 @@ export default function BettorView({
         <BetModal
           team={selectedTeam}
           maxAmount={userBalance?.balance || 0}
+          hasTeam={userBalance?.hasTeam}
           pending={betPending}
           error={betResult?.success === false ? betResult.error : null}
           onConfirm={(amount) => handlePlaceBet(selectedTeam.id, amount)}

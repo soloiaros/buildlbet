@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import BettorView from "./components/BettorView";
 import DashboardView from "./components/DashboardView";
-import TeamSetup from "./components/TeamSetup";
+import TeamTabView from "./components/TeamTabView";
+import BottomNav from "./components/BottomNav";
 import { getSavedWallet, saveWallet } from "./walletStore";
 import { claimWallet, reclaimWallet, fetchMarket, fetchBalance } from "./api";
 import "./App.css";
@@ -13,6 +14,7 @@ function getRoute() {
 
 export default function App() {
   const [route, setRoute] = useState(getRoute);
+  const [currentTab, setCurrentTab] = useState("bet");
   const [wallet, setWallet] = useState(null);
   const [market, setMarket] = useState(null);
   const [userBalance, setUserBalance] = useState(null);
@@ -124,27 +126,30 @@ export default function App() {
     );
   }
 
-  // If wallet is claimed but user hasn't joined/created a team
-  if (wallet && userBalance && !userBalance.hasTeam) {
-    return (
-      <TeamSetup
-        wallet={wallet}
-        market={market}
-        onRefresh={refreshData}
-      />
-    );
-  }
+  // If wallet is claimed but user hasn't joined/created a team, we don't hard-gate them anymore.
+  // We let them browse the Bet tab or use the Team tab to join/create.
 
-  // Bettor route — needs wallet and team
   return (
-    <BettorView
-      wallet={wallet}
-      market={market}
-      userBalance={userBalance}
-      onClaimWallet={handleClaimWallet}
-      claimingWallet={claiming}
-      claimError={error}
-      onRefresh={refreshData}
-    />
+    <>
+      {currentTab === "bet" ? (
+        <BettorView
+          wallet={wallet}
+          market={market}
+          userBalance={userBalance}
+          onClaimWallet={handleClaimWallet}
+          claimingWallet={claiming}
+          claimError={error}
+          onRefresh={refreshData}
+        />
+      ) : (
+        <TeamTabView
+          wallet={wallet}
+          market={market}
+          userBalance={userBalance}
+          onRefresh={refreshData}
+        />
+      )}
+      <BottomNav currentTab={currentTab} onChange={setCurrentTab} />
+    </>
   );
 }
