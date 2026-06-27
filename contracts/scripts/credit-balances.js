@@ -10,20 +10,29 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const walletsPath = path.join(__dirname, "..", "demo-wallets.json");
-  const deploymentPath = path.join(__dirname, "..", "deployment.json");
-
-  if (!fs.existsSync(walletsPath)) {
-    console.error("❌ demo-wallets.json not found. Run: npm run generate-wallets");
-    process.exit(1);
+  let wallets = [];
+  if (process.env.DEMO_WALLETS_JSON) {
+    wallets = JSON.parse(process.env.DEMO_WALLETS_JSON);
+  } else {
+    const walletsPath = path.join(__dirname, "..", "demo-wallets.json");
+    if (!fs.existsSync(walletsPath)) {
+      console.error("❌ demo-wallets.json not found. Run: npm run generate-wallets");
+      process.exit(1);
+    }
+    wallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
   }
-  if (!fs.existsSync(deploymentPath)) {
-    console.error("❌ deployment.json not found. Deploy the contract first: npm run deploy");
-    process.exit(1);
-  }
 
-  const wallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
-  const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
+  let deployment;
+  if (process.env.DEPLOYMENT) {
+    deployment = JSON.parse(process.env.DEPLOYMENT);
+  } else {
+    const deploymentPath = path.join(__dirname, "..", "deployment.json");
+    if (!fs.existsSync(deploymentPath)) {
+      console.error("❌ deployment.json not found. Deploy the contract first: npm run deploy");
+      process.exit(1);
+    }
+    deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
+  }
   const balancePerWallet = 1000; // play-money tokens
 
   console.log(`Contract: ${deployment.address}`);

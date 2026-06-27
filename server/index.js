@@ -26,20 +26,40 @@ const PORT = process.env.PORT || 3001;
 const RPC_URL = process.env.MONAD_RPC_URL || "https://testnet-rpc.monad.xyz";
 
 // Load deployment info (contract address + ABI)
-const deploymentPath = path.join(__dirname, "..", "contracts", "deployment.json");
-if (!fs.existsSync(deploymentPath)) {
-  console.error("❌ contracts/deployment.json not found. Deploy the contract first.");
-  process.exit(1);
+let deployment;
+if (process.env.DEPLOYMENT) {
+  try {
+    deployment = JSON.parse(process.env.DEPLOYMENT);
+  } catch (err) {
+    console.error("❌ Failed to parse DEPLOYMENT:", err.message);
+    process.exit(1);
+  }
+} else {
+  const deploymentPath = path.join(__dirname, "..", "contracts", "deployment.json");
+  if (!fs.existsSync(deploymentPath)) {
+    console.error("❌ contracts/deployment.json not found. Deploy the contract first.");
+    process.exit(1);
+  }
+  deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
 }
-const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
 
 // Load demo wallets
-const walletsPath = path.join(__dirname, "..", "contracts", "demo-wallets.json");
-if (!fs.existsSync(walletsPath)) {
-  console.error("❌ contracts/demo-wallets.json not found. Run: cd contracts && npm run generate-wallets");
-  process.exit(1);
+let demoWallets = [];
+if (process.env.DEMO_WALLETS_JSON) {
+  try {
+    demoWallets = JSON.parse(process.env.DEMO_WALLETS_JSON);
+  } catch (err) {
+    console.error("❌ Failed to parse DEMO_WALLETS_JSON:", err.message);
+    process.exit(1);
+  }
+} else {
+  const walletsPath = path.join(__dirname, "..", "contracts", "demo-wallets.json");
+  if (!fs.existsSync(walletsPath)) {
+    console.error("❌ contracts/demo-wallets.json not found. Run: cd contracts && npm run generate-wallets");
+    process.exit(1);
+  }
+  demoWallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
 }
-const demoWallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
 
 // ── Setup ethers ────────────────────────────────────────────────────────
 

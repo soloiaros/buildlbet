@@ -128,15 +128,6 @@ export default function DashboardView({ market, wallet }) {
         </div>
       </header>
 
-      {/* Collectibles Carousel */}
-      {wallet && (
-        <CardsCarousel 
-          ownedCards={ownedCards} 
-          claimingCard={claimingCard} 
-          onClaimClick={() => setShowScanner(true)} 
-        />
-      )}
-
       {/* Resolution Banner */}
       {market.resolved && (
         <div className="brutal-card dashboard-resolved">
@@ -214,31 +205,64 @@ export default function DashboardView({ market, wallet }) {
         )}
       </div>
 
+      {/* Collectibles Carousel */}
+      {wallet && (
+        <CardsCarousel 
+          ownedCards={ownedCards} 
+          claimingCard={claimingCard} 
+          onClaimClick={() => setShowScanner(true)} 
+        />
+      )}
+
       {/* Recent Posts */}
       {recentPosts.length > 0 && (
-        <div className="dashboard-recent-posts">
-          <h2 className="recent-posts-title">LATEST PROJECT POSTS</h2>
-          <div className="recent-posts-grid">
-            {recentPosts.map((post) => (
+        <div className="brutal-card dashboard-recent-posts" style={{ padding: 0, overflow: 'hidden' }}>
+          <h2 className="recent-posts-title" style={{ padding: "24px", margin: 0, borderBottom: "4px solid black", background: "var(--accent-purple)", color: "white" }}>
+            LATEST PROJECT POSTS
+          </h2>
+          <div className="recent-posts-list" style={{ display: "flex", flexDirection: "column" }}>
+            {recentPosts.map((post, idx) => (
               <div 
                 key={`${post.teamId}-${post.updatedAt}`} 
-                className="brutal-card recent-post-card"
+                className="recent-post-card"
+                style={{ 
+                  padding: "24px", 
+                  borderBottom: idx === recentPosts.length - 1 ? "none" : "2px solid black",
+                  display: "flex",
+                  gap: "16px",
+                  alignItems: "flex-start",
+                  cursor: "pointer"
+                }}
                 onClick={() => setSelectedPost(post)}
               >
-                <div className="recent-post-header">
-                  {post.teamName}
-                </div>
                 {post.imageBase64 && (
                   <div 
                     className="recent-post-thumb" 
-                    style={{ backgroundImage: `url(${post.imageBase64})` }} 
+                    style={{ 
+                      backgroundImage: `url(${post.imageBase64})`,
+                      width: "120px",
+                      height: "120px",
+                      flexShrink: 0,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      border: "2px solid black",
+                      borderRadius: "8px"
+                    }} 
                   />
                 )}
-                {post.text && (
-                  <p className="recent-post-snippet">
-                    {post.text.length > 60 ? post.text.slice(0, 60) + '...' : post.text}
-                  </p>
-                )}
+                <div style={{ flex: 1 }}>
+                  <div className="recent-post-header" style={{ fontWeight: 900, marginBottom: "8px", textTransform: "uppercase", color: "var(--accent-purple)" }}>
+                    {post.teamName}
+                  </div>
+                  {post.text && (
+                    <p className="recent-post-snippet" style={{ margin: 0, fontWeight: 600, fontSize: "1rem" }}>
+                      {post.text.length > 100 ? post.text.slice(0, 100) + '...' : post.text}
+                    </p>
+                  )}
+                  <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "12px", fontWeight: 700 }}>
+                    {new Date(post.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

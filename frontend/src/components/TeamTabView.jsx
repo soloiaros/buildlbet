@@ -169,18 +169,18 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
       </div>
 
       {posts.length > 0 && (
-        <div className="team-posts-feed">
-          <h3 className="feed-title" style={{ fontFamily: "var(--font-family)", fontWeight: 900, marginBottom: "16px" }}>
+        <div className="brutal-card team-posts-feed" style={{ padding: 0, overflow: 'hidden' }}>
+          <h3 className="feed-title" style={{ fontFamily: "var(--font-family)", fontWeight: 900, padding: "24px", margin: 0, borderBottom: "4px solid black", background: "var(--accent-purple)", color: "white" }}>
             PROJECT FEED
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             {[...posts].sort((a, b) => b.updatedAt - a.updatedAt).map((p, idx) => (
-              <div key={idx} className="brutal-card current-post-card">
+              <div key={idx} className="current-post-card" style={{ padding: "24px", borderBottom: idx === posts.length - 1 ? "none" : "2px solid black" }}>
                 {p.imageBase64 && (
-                  <img src={p.imageBase64} alt="Team project" className="current-post-image" />
+                  <img src={p.imageBase64} alt="Team project" className="current-post-image" style={{ width: '100%', border: '2px solid black', borderRadius: 'var(--radius-sm)', marginBottom: '16px' }} />
                 )}
-                {p.text && <p className="current-post-text">{p.text}</p>}
-                <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "12px", textAlign: "right" }}>
+                {p.text && <p className="current-post-text" style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{p.text}</p>}
+                <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "12px", fontWeight: 700 }}>
                   {new Date(p.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>

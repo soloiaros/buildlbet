@@ -23,9 +23,9 @@ export default function CardsCarousel({ ownedCards, claimingCard, onClaimClick }
   ];
 
   return (
-    <div className="cards-carousel-section brutal-card">
+    <div className="cards-carousel-section">
       <div className="carousel-header">
-        <h2 className="carousel-title">YOUR COLLECTION</h2>
+        <h2 className="carousel-title">THIS EVENT'S COLLECTION</h2>
         <button className="btn btn-secondary" onClick={onClaimClick} disabled={claimingCard}>
           {claimingCard ? <span className="spinner" /> : <><Camera size={16} /> CLAIM</>}
         </button>
