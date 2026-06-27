@@ -84,6 +84,8 @@ A hackathon prediction market on Monad testnet. Attendees bet play-money tokens 
 
 ### Key State
 - `organizer` — deployer's address, the only one who can `creditBalance` and `resolve`
+- `teamCount` / `teamNames` — dynamic team list, grows as attendees create teams
+- `memberOfTeam[address]` — which team a wallet belongs to
 - `balances[address]` — play-money balance (not a real token)
 - `teamPools[teamId]` — total staked on each team
 - `userBets[address][teamId]` — how much each address bet on each team
@@ -93,8 +95,10 @@ A hackathon prediction market on Monad testnet. Attendees bet play-money tokens 
 ### Functions
 | Function | Access | Purpose |
 |---|---|---|
+| `createTeam(name)` | Anyone w/o team | Creates a team, makes caller first member |
+| `joinTeam(teamId)` | Anyone w/o team | Joins an existing team |
 | `creditBalance(address, amount)` | Organizer only | Add play-money to a wallet |
-| `placeBet(teamId, amount)` | Anyone (before resolve) | Deduct balance, add to team pool |
+| `placeBet(teamId, amount)` | Anyone (before resolve) | Deduct balance, add to team pool (cannot bet on own team) |
 | `resolve(winningTeamId)` | Organizer only, once | Lock betting, declare winner |
 | `claimPayout()` | Anyone (after resolve) | Credit proportional winnings |
 | `getMarketState()` | View | Returns (resolved, winningTeamId, teamCount, totalPool) |
@@ -115,10 +119,12 @@ payout = (userContribution to winning team) * totalPool / winningTeamPool
 |---|---|---|---|
 | POST | `/api/claim-wallet` | — | `{ walletId, address }` |
 | POST | `/api/reclaim-wallet` | `{ walletId }` | `{ walletId, address }` |
+| POST | `/api/create-team` | `{ walletId, name }` | `{ success, txHash }` |
+| POST | `/api/join-team` | `{ walletId, teamId }` | `{ success, txHash }` |
 | POST | `/api/bet` | `{ walletId, teamId, amount }` | `{ success, txHash }` |
 | POST | `/api/claim-payout` | `{ walletId }` | `{ success, txHash }` |
 | GET | `/api/market` | — | `{ resolved, winningTeamId, totalPool, teams[] }` |
-| GET | `/api/balance/:walletId` | — | `{ address, balance, bets[], hasClaimed }` |
+| GET | `/api/balance/:walletId` | — | `{ address, balance, bets[], hasClaimed, hasTeam, teamId }` |
 
 ---
 

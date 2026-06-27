@@ -30,6 +30,22 @@ export async function reclaimWallet(walletId) {
   });
 }
 
+/** Create a new team */
+export async function createTeam(walletId, name) {
+  return request("/api/create-team", {
+    method: "POST",
+    body: JSON.stringify({ walletId, name }),
+  });
+}
+
+/** Join an existing team */
+export async function joinTeam(walletId, teamId) {
+  return request("/api/join-team", {
+    method: "POST",
+    body: JSON.stringify({ walletId, teamId }),
+  });
+}
+
 /** Place a bet on a team */
 export async function placeBet(walletId, teamId, amount) {
   return request("/api/bet", {

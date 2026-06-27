@@ -204,6 +204,7 @@ export default function BettorView({
               userBet={userBalance?.bets?.find((b) => b.teamId === team.id)?.amount || 0}
               isWinner={isResolved && team.id === winningTeamId}
               isResolved={isResolved}
+              isOwnTeam={userBalance?.hasTeam && userBalance?.teamId === team.id}
               onClick={() => !isResolved && setSelectedTeam(team)}
               animDelay={i * 0.08}
             />

@@ -106,3 +106,14 @@
   font-weight: 700;
   color: var(--accent-green);
 }
+
+.team-own-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.team-card-own {
+  border-style: dashed;
+}

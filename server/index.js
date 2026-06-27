@@ -101,6 +101,68 @@ app.post("/api/reclaim-wallet", (req, res) => {
 });
 
 /**
+ * POST /api/create-team
+ * Body: { walletId, name }
+ * Signs and submits a createTeam transaction.
+ */
+app.post("/api/create-team", async (req, res) => {
+  try {
+    const { walletId, name } = req.body;
+    const w = getWalletById(walletId);
+    if (!w) {
+      return res.status(400).json({ error: "Invalid wallet ID" });
+    }
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: "Team name cannot be empty" });
+    }
+
+    const tx = await w.contract.createTeam(name.trim());
+    const receipt = await tx.wait();
+
+    // To get the teamId, we can parse the TeamCreated event, but it's simpler
+    // to just let the frontend refresh the market state to see the new team.
+    return res.json({
+      success: true,
+      txHash: receipt.hash,
+    });
+  } catch (err) {
+    console.error("Create team error:", err.message);
+    const reason = err.reason || err.shortMessage || err.message;
+    return res.status(400).json({ error: reason });
+  }
+});
+
+/**
+ * POST /api/join-team
+ * Body: { walletId, teamId }
+ * Signs and submits a joinTeam transaction.
+ */
+app.post("/api/join-team", async (req, res) => {
+  try {
+    const { walletId, teamId } = req.body;
+    const w = getWalletById(walletId);
+    if (!w) {
+      return res.status(400).json({ error: "Invalid wallet ID" });
+    }
+    if (teamId === undefined) {
+      return res.status(400).json({ error: "Missing teamId" });
+    }
+
+    const tx = await w.contract.joinTeam(teamId);
+    const receipt = await tx.wait();
+
+    return res.json({
+      success: true,
+      txHash: receipt.hash,
+    });
+  } catch (err) {
+    console.error("Join team error:", err.message);
+    const reason = err.reason || err.shortMessage || err.message;
+    return res.status(400).json({ error: reason });
+  }
+});
+
+/**
  * POST /api/bet
  * Body: { walletId, teamId, amount }
  * Signs and submits a placeBet transaction on behalf of the wallet.
@@ -213,12 +275,15 @@ app.get("/api/balance/:walletId", async (req, res) => {
 
     // Check if payout has been claimed (only relevant after resolution)
     const hasClaimed = await readContract.hasClaimed(w.address);
+    const [hasTeam, teamId] = await readContract.getTeamMembership(w.address);
 
     return res.json({
       address: w.address,
       balance: Number(balance),
       bets: bets,
       hasClaimed: hasClaimed,
+      hasTeam: hasTeam,
+      teamId: hasTeam ? Number(teamId) : null,
     });
   } catch (err) {
     console.error("Balance read error:", err.message);

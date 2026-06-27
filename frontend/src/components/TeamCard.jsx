@@ -15,6 +15,7 @@ export default function TeamCard({
   userBet,
   isWinner,
   isResolved,
+  isOwnTeam,
   onClick,
   animDelay,
 }) {
@@ -24,16 +25,16 @@ export default function TeamCard({
 
   return (
     <div
-      className={`team-card ${isResolved ? "team-card-resolved" : ""} ${isWinner ? "team-card-winner" : ""}`}
+      className={`team-card ${isResolved || isOwnTeam ? "team-card-resolved" : ""} ${isWinner ? "team-card-winner" : ""} ${isOwnTeam ? "team-card-own" : ""}`}
       style={{
         "--team-bg": color.bg,
         "--team-border": color.border,
         "--team-accent": color.accent,
         animationDelay: `${animDelay}s`,
       }}
-      onClick={!isResolved ? onClick : undefined}
-      role={!isResolved ? "button" : undefined}
-      tabIndex={!isResolved ? 0 : undefined}
+      onClick={!isResolved && !isOwnTeam ? onClick : undefined}
+      role={!isResolved && !isOwnTeam ? "button" : undefined}
+      tabIndex={!isResolved && !isOwnTeam ? 0 : undefined}
     >
       <div className="team-card-left">
         <div className="team-name">{team.name}</div>
@@ -44,6 +45,11 @@ export default function TeamCard({
         {userBet > 0 && (
           <div className="team-user-bet">
             Your bet: {userBet}
+          </div>
+        )}
+        {isOwnTeam && (
+          <div className="team-own-label">
+            Your team — can't bet here
           </div>
         )}
       </div>

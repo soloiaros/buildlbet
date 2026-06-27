@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import BettorView from "./components/BettorView";
 import DashboardView from "./components/DashboardView";
+import TeamSetup from "./components/TeamSetup";
 import { getSavedWallet, saveWallet } from "./walletStore";
 import { claimWallet, reclaimWallet, fetchMarket, fetchBalance } from "./api";
 import "./App.css";
@@ -112,7 +113,29 @@ export default function App() {
     return <DashboardView market={market} />;
   }
 
-  // Bettor route — needs wallet
+  // If wallet is claimed but balance hasn't loaded yet
+  if (wallet && !userBalance) {
+    return (
+      <div className="bettor-container">
+        <div className="loading-state animate-pulse" style={{ marginTop: "20vh", textAlign: "center" }}>
+          Loading your data...
+        </div>
+      </div>
+    );
+  }
+
+  // If wallet is claimed but user hasn't joined/created a team
+  if (wallet && userBalance && !userBalance.hasTeam) {
+    return (
+      <TeamSetup
+        wallet={wallet}
+        market={market}
+        onRefresh={refreshData}
+      />
+    );
+  }
+
+  // Bettor route — needs wallet and team
   return (
     <BettorView
       wallet={wallet}
