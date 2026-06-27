@@ -1,27 +1,48 @@
 .dashboard-container {
-  padding: 40px;
+  padding: 24px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
+@media (min-width: 768px) {
+  .dashboard-container {
+    padding: 40px;
+  }
+}
+
 .dashboard-header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 24px 32px;
   background: var(--accent-amber);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .dashboard-header {
+    flex-direction: row;
+    gap: 0;
+  }
 }
 
 .dashboard-title {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 900;
   margin: 0;
   text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .dashboard-title {
+    font-size: 2.5rem;
+  }
 }
 
 .dashboard-total {
@@ -53,84 +74,43 @@
 
 .dashboard-content {
   flex: 1;
-  padding: 40px;
+  padding: 24px 16px;
   background: white;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.dashboard-bars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 100%;
-  min-height: 50vh;
-  gap: 16px;
-}
-
-.dashboard-bar-col {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  flex: 1;
-  max-width: 120px;
-  transition: opacity 0.3s ease;
+  justify-content: center;
+  min-height: 50vh;
 }
 
-.dashboard-bar-col.dimmed {
-  opacity: 0.4;
-  filter: grayscale(1);
+/* Recharts Tooltip styling */
+.brutal-tooltip {
+  background: white;
+  border: 4px solid black;
+  padding: 16px;
+  box-shadow: 6px 6px 0px black;
+  border-radius: var(--radius-md);
+  text-transform: uppercase;
 }
 
-.dashboard-bar-odds {
+.brutal-tooltip-name {
   font-size: 1.5rem;
   font-weight: 900;
-  padding: 8px 16px;
-  margin-bottom: 12px;
-  background: var(--bg-primary);
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-
-.dashboard-bar-amount {
-  font-size: 1.1rem;
-  font-weight: 800;
   margin-bottom: 8px;
-  color: var(--text-secondary);
+  padding-bottom: 8px;
+  border-bottom: 2px solid black;
 }
 
-.dashboard-bar-track {
-  width: 100%;
-  height: 40vh;
-  background: var(--bg-primary);
-  border-radius: var(--radius-md);
-  position: relative;
+.brutal-tooltip-stat {
+  font-size: 1.1rem;
+  font-weight: 700;
   display: flex;
-  align-items: flex-end;
-  overflow: hidden;
-  padding: 0;
-  box-shadow: none !important;
-  border-width: 4px;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 4px;
 }
 
-.dashboard-bar-fill {
-  width: 100%;
-  border-top: 4px solid var(--border-color);
-}
-
-.dashboard-bar-name {
-  margin-top: 24px;
-  font-size: 1.25rem;
+.brutal-tooltip-stat span {
   font-weight: 900;
-  text-align: center;
-  text-transform: uppercase;
-  word-wrap: break-word;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
 }
 
 .dashboard-resolved {
@@ -140,9 +120,15 @@
   gap: 24px;
   padding: 24px;
   background: var(--accent-green);
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   text-transform: uppercase;
   animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (min-width: 768px) {
+  .dashboard-resolved {
+    font-size: 2.5rem;
+  }
 }
 
 .dashboard-live {

@@ -1,21 +1,39 @@
-import { motion } from "framer-motion";
-import { Zap, Trophy, TrendingUp } from "lucide-react";
+import { Zap, TrendingUp } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from "recharts";
 import "./DashboardView.css";
 
 const BAR_COLORS = [
-  { bg: "var(--accent-pink)" },
-  { bg: "var(--accent-cyan)" },
-  { bg: "var(--accent-amber)" },
-  { bg: "var(--accent-green)" },
-  { bg: "var(--accent-red)" },
-  { bg: "var(--accent-purple)" },
+  "var(--accent-pink)",
+  "var(--accent-cyan)",
+  "var(--accent-amber)",
+  "var(--accent-green)",
+  "var(--accent-red)",
+  "var(--accent-purple)",
 ];
 
-export default function DashboardView({ market }) {
-  const maxPool = market?.teams
-    ? Math.max(...market.teams.map((t) => t.pool), 1)
-    : 1;
+const BrutalTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="brutal-tooltip">
+        <div className="brutal-tooltip-name">{data.name}</div>
+        <div className="brutal-tooltip-stat">Pool: <span>{data.pool}</span></div>
+        <div className="brutal-tooltip-stat">Odds: <span>{data.odds > 0 ? `${data.odds}x` : "—"}</span></div>
+      </div>
+    );
+  }
+  return null;
+};
 
+export default function DashboardView({ market }) {
   if (!market) {
     return (
       <div className="dashboard-container">
@@ -51,49 +69,50 @@ export default function DashboardView({ market }) {
         </div>
       )}
 
-      {/* Bars */}
+      {/* Actual Graph */}
       <div className="brutal-card dashboard-content">
-        <div className="dashboard-bars">
-          {market.teams.map((team, i) => {
-            const color = BAR_COLORS[i % BAR_COLORS.length];
-            const heightPercent = maxPool > 0 ? (team.pool / maxPool) * 100 : 0;
-            const isWinner = market.resolved && team.id === market.winningTeamId;
-
-            return (
-              <div
-                key={team.id}
-                className={`dashboard-bar-col ${isWinner ? "winner" : ""} ${market.resolved && !isWinner ? "dimmed" : ""}`}
-              >
-                {/* Odds */}
-                <div className="dashboard-bar-odds brutal-card">
-                  {team.odds > 0 ? `${team.odds}x` : "—"}
-                </div>
-
-                {/* Pool Amount */}
-                <div className="dashboard-bar-amount">
-                  {team.pool.toLocaleString()}
-                </div>
-
-                {/* Bar */}
-                <div className="dashboard-bar-track brutal-card">
-                  <motion.div
-                    className="dashboard-bar-fill"
-                    initial={{ height: "0%" }}
-                    animate={{ height: `${Math.max(heightPercent, 2)}%` }}
-                    transition={{ type: "spring", damping: 15, stiffness: 100 }}
-                    style={{ background: color.bg }}
+        <ResponsiveContainer width="100%" height="100%" minHeight={400}>
+          <BarChart
+            data={market.teams}
+            margin={{ top: 40, right: 20, left: 20, bottom: 40 }}
+          >
+            <XAxis
+              dataKey="name"
+              axisLine={{ stroke: "black", strokeWidth: 4 }}
+              tickLine={{ stroke: "black", strokeWidth: 4 }}
+              tick={{ fill: "black", fontSize: 16, fontWeight: 900, fontFamily: "Space Grotesk" }}
+              dy={16}
+            />
+            <YAxis
+              hide
+              domain={[0, 'dataMax']}
+            />
+            <Tooltip
+              content={<BrutalTooltip />}
+              cursor={{ fill: "rgba(0,0,0,0.05)" }}
+            />
+            <Bar
+              dataKey="pool"
+              isAnimationActive={true}
+              animationDuration={1500}
+              animationEasing="ease-out"
+              stroke="black"
+              strokeWidth={4}
+            >
+              {market.teams.map((entry, index) => {
+                const isWinner = market.resolved && entry.id === market.winningTeamId;
+                const isLoser = market.resolved && !isWinner;
+                return (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={BAR_COLORS[index % BAR_COLORS.length]}
+                    opacity={isLoser ? 0.4 : 1}
                   />
-                </div>
-
-                {/* Team Name */}
-                <div className="dashboard-bar-name">
-                  {isWinner && <Trophy size={16} fill="black" />}
-                  {team.name}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Live indicator */}

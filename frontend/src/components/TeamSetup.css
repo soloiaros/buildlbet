@@ -127,10 +127,23 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 40vh;
+  max-height: 50vh;
   overflow-y: auto;
   text-align: left;
   padding-right: 8px;
+}
+
+@media (min-width: 768px) {
+  .setup-team-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .setup-form {
+    max-width: 600px;
+  }
+  .setup-screen {
+    padding: 60px 40px;
+  }
 }
 
 .setup-team-option {
