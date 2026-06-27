@@ -7,26 +7,13 @@ import { getSavedWallet, saveWallet } from "./walletStore";
 import { claimWallet, reclaimWallet, fetchMarket, fetchBalance } from "./api";
 import "./App.css";
 
-function getRoute() {
-  const hash = window.location.hash.replace("#", "") || "/";
-  return hash;
-}
-
 export default function App() {
-  const [route, setRoute] = useState(getRoute);
-  const [currentTab, setCurrentTab] = useState("bet");
+  const [currentTab, setCurrentTab] = useState("dashboard");
   const [wallet, setWallet] = useState(null);
   const [market, setMarket] = useState(null);
   const [userBalance, setUserBalance] = useState(null);
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState(null);
-
-  // Listen to hash changes
-  useEffect(() => {
-    const onHashChange = () => setRoute(getRoute());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
 
   // On mount, restore wallet from localStorage
   useEffect(() => {
@@ -56,12 +43,12 @@ export default function App() {
       }
     };
     poll();
-    const interval = setInterval(poll, route === "/dashboard" ? 3000 : 5000);
+    const interval = setInterval(poll, currentTab === "dashboard" ? 3000 : 5000);
     return () => {
       active = false;
       clearInterval(interval);
     };
-  }, [route]);
+  }, [currentTab]);
 
   // Poll user balance when wallet is set
   useEffect(() => {
@@ -110,11 +97,6 @@ export default function App() {
     }
   }, [wallet]);
 
-  // Dashboard route — no wallet needed
-  if (route === "/dashboard") {
-    return <DashboardView market={market} />;
-  }
-
   // If wallet is claimed but balance hasn't loaded yet
   if (wallet && !userBalance) {
     return (
@@ -131,7 +113,10 @@ export default function App() {
 
   return (
     <>
-      {currentTab === "bet" ? (
+      {currentTab === "dashboard" && (
+        <DashboardView market={market} />
+      )}
+      {currentTab === "bet" && (
         <BettorView
           wallet={wallet}
           market={market}
@@ -141,7 +126,8 @@ export default function App() {
           claimError={error}
           onRefresh={refreshData}
         />
-      ) : (
+      )}
+      {currentTab === "team" && (
         <TeamTabView
           wallet={wallet}
           market={market}

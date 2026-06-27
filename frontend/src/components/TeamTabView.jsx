@@ -5,7 +5,7 @@ import { ImagePlus, Send, RefreshCcw } from "lucide-react";
 import "./TeamTabView.css";
 
 export default function TeamTabView({ wallet, market, userBalance, onRefresh }) {
-  const [post, setPost] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [publishing, setPublishing] = useState(false);
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
@@ -17,7 +17,7 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
     if (userBalance?.hasTeam && userBalance.teamId != null) {
       fetchTeamPost(userBalance.teamId)
         .then((res) => {
-          if (res.hasPost) setPost(res.post);
+          if (res.hasPost) setPosts(res.posts);
         })
         .catch((err) => console.error("Error fetching team post", err));
     }
@@ -69,7 +69,7 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
     try {
       const res = await publishTeamPost(wallet.walletId, preview || "", text);
       if (res.success) {
-        setPost(res.post);
+        setPosts(prev => [...prev, res.post]);
         setPreview(null);
         setText("");
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -162,13 +162,24 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
         </form>
       </div>
 
-      {post && (
-        <div className="brutal-card current-post-card">
-          <h3 className="current-post-title">CURRENTLY LIVE</h3>
-          {post.imageBase64 && (
-            <img src={post.imageBase64} alt="Team project" className="current-post-image" />
-          )}
-          {post.text && <p className="current-post-text">{post.text}</p>}
+      {posts.length > 0 && (
+        <div className="team-posts-feed">
+          <h3 className="feed-title" style={{ fontFamily: "var(--font-family)", fontWeight: 900, marginBottom: "16px" }}>
+            PROJECT FEED
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {[...posts].sort((a, b) => b.updatedAt - a.updatedAt).map((p, idx) => (
+              <div key={idx} className="brutal-card current-post-card">
+                {p.imageBase64 && (
+                  <img src={p.imageBase64} alt="Team project" className="current-post-image" />
+                )}
+                {p.text && <p className="current-post-text">{p.text}</p>}
+                <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "12px", textAlign: "right" }}>
+                  {new Date(p.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

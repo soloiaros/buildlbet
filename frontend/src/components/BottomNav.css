@@ -1,15 +1,19 @@
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  max-width: 400px;
   height: 72px;
   background: var(--bg-card);
-  border-top: var(--border-width) solid var(--border-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 9999px;
+  box-shadow: 6px 6px 0 var(--shadow-color);
   display: flex;
   align-items: stretch;
   z-index: 50;
-  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden; /* keeps child buttons within rounded corners */
 }
 
 .nav-divider {
@@ -40,18 +44,15 @@
 
 .nav-btn.active {
   color: var(--text-primary);
+}
+
+/* Specific tab active colors */
+.nav-btn.active:nth-child(1) {
   background: var(--accent-cyan);
 }
-
 .nav-btn.active:nth-child(3) {
-  background: var(--accent-pink);
+  background: var(--accent-amber);
 }
-
-@media (min-width: 768px) {
-  .bottom-nav {
-    top: 0;
-    bottom: auto;
-    border-top: none;
-    border-bottom: var(--border-width) solid var(--border-color);
-  }
+.nav-btn.active:nth-child(5) {
+  background: var(--accent-pink);
 }

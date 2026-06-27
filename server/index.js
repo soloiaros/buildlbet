@@ -281,8 +281,8 @@ app.get("/api/market", async (req, res) => {
         name: names[i],
         pool: pool,
         odds: Math.round(odds * 10) / 10,
-        bettorCount: teamBettors[i] ? teamBettors[i].size : 0,
-        hasPost: !!teamPosts[i]
+        bettorCount: teamBettors.has(i) ? teamBettors.get(i).size : 0,
+        hasPost: !!(teamPosts[i] && teamPosts[i].length > 0)
       });
     }
 
@@ -371,14 +371,20 @@ app.post("/api/team-post", async (req, res) => {
     if (!hasTeam) return res.status(403).json({ error: "Must belong to a team to post" });
 
     const tId = Number(teamId);
-    teamPosts[tId] = {
+    if (!teamPosts[tId]) {
+      teamPosts[tId] = [];
+    }
+
+    const newPost = {
       teamId: tId,
       imageBase64: imageBase64 || null,
       text: text || "",
       updatedAt: Date.now()
     };
+    
+    teamPosts[tId].push(newPost);
 
-    return res.json({ success: true, post: teamPosts[tId] });
+    return res.json({ success: true, post: newPost });
   } catch (err) {
     console.error("Post error:", err);
     return res.status(500).json({ error: "Failed to save post" });
@@ -390,19 +396,22 @@ app.post("/api/team-post", async (req, res) => {
  */
 app.get("/api/team-post/:teamId", (req, res) => {
   const tId = Number(req.params.teamId);
-  if (teamPosts[tId]) {
-    return res.json({ hasPost: true, post: teamPosts[tId] });
+  if (teamPosts[tId] && teamPosts[tId].length > 0) {
+    return res.json({ hasPost: true, posts: teamPosts[tId] });
   }
-  return res.json({ hasPost: false });
+  return res.json({ hasPost: false, posts: [] });
 });
 
 /**
  * GET /api/recent-posts
  */
 app.get("/api/recent-posts", async (req, res) => {
-  // Returns posts sorted by updatedAt, plus the team name
   try {
-    const posts = Object.values(teamPosts).sort((a, b) => b.updatedAt - a.updatedAt);
+    // Flatten all arrays into a single array
+    const allPosts = Object.values(teamPosts).flat();
+    
+    // Sort by updatedAt descending
+    const posts = allPosts.sort((a, b) => b.updatedAt - a.updatedAt);
     
     // Attach team names
     const [, names] = await readContract.getAllTeams();

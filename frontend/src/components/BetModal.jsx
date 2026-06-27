@@ -6,7 +6,7 @@ import "./BetModal.css";
 
 export default function BetModal({ team, maxAmount, hasTeam, pending, error, onConfirm, onClose }) {
   const [amount, setAmount] = useState("");
-  const [post, setPost] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [loadingPost, setLoadingPost] = useState(true);
 
   const numAmount = parseInt(amount) || 0;
@@ -33,7 +33,7 @@ export default function BetModal({ team, maxAmount, hasTeam, pending, error, onC
     setLoadingPost(true);
     fetchTeamPost(team.id)
       .then((res) => {
-        if (res.hasPost) setPost(res.post);
+        if (res.hasPost) setPosts(res.posts);
       })
       .catch(console.error)
       .finally(() => setLoadingPost(false));
@@ -70,10 +70,14 @@ export default function BetModal({ team, maxAmount, hasTeam, pending, error, onC
             </div>
           </div>
 
-          {!loadingPost && post && (
-            <div className="modal-post-preview brutal-card">
-              {post.imageBase64 && <img src={post.imageBase64} alt="Project" />}
-              {post.text && <p>{post.text}</p>}
+          {!loadingPost && posts.length > 0 && (
+            <div className="modal-posts-feed" style={{ maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px", paddingRight: "8px" }}>
+              {[...posts].sort((a, b) => b.updatedAt - a.updatedAt).map((p, idx) => (
+                <div key={idx} className="modal-post-preview brutal-card" style={{ marginBottom: 0 }}>
+                  {p.imageBase64 && <img src={p.imageBase64} alt="Project" />}
+                  {p.text && <p>{p.text}</p>}
+                </div>
+              ))}
             </div>
           )}
           {loadingPost && (

@@ -1,6 +1,6 @@
 .dashboard-container {
-  padding: 24px;
-  min-height: 100vh;
+  margin: 0 auto;
+  padding: 24px 16px 140px;
   display: flex;
   flex-direction: column;
   gap: 24px;

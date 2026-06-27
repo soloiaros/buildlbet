@@ -156,7 +156,7 @@ export default function DashboardView({ market }) {
           <div className="recent-posts-grid">
             {recentPosts.map((post) => (
               <div 
-                key={post.teamId} 
+                key={`${post.teamId}-${post.updatedAt}`} 
                 className="brutal-card recent-post-card"
                 onClick={() => setSelectedPost(post)}
               >
