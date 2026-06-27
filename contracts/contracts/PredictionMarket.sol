@@ -5,7 +5,8 @@ pragma solidity ^0.8.24;
  * @title PredictionMarket
  * @notice A simple parimutuel prediction market for hackathon demos.
  *         Uses internal play-money balances (no real token transfers).
- *         Teams are fixed at deploy time. Bets are add-only (no withdrawals).
+ *         Teams are created dynamically by attendees (createTeam/joinTeam).
+ *         Bets are add-only (no withdrawals). You cannot bet on your own team.
  *         After resolution, winners claim proportional payouts.
  */
 contract PredictionMarket {
@@ -13,6 +14,7 @@ contract PredictionMarket {
 
     address public organizer;
     string[] public teamNames;
+    uint256 public teamCount;
     bool public resolved;
     uint256 public winningTeamId;
     uint256 public totalPool;
@@ -29,25 +31,25 @@ contract PredictionMarket {
     // address => whether they've already claimed their payout
     mapping(address => bool) public hasClaimed;
 
+    // address => whether they have joined or created a team
+    mapping(address => bool) public hasTeam;
+
+    // address => which team this wallet belongs to
+    mapping(address => uint256) public memberOfTeam;
+
     // ── Events ─────────────────────────────────────────────────────────
 
     event BalanceCredited(address indexed account, uint256 amount);
     event BetPlaced(address indexed bettor, uint256 indexed teamId, uint256 amount);
     event MarketResolved(uint256 indexed winningTeamId);
     event PayoutClaimed(address indexed claimant, uint256 amount);
+    event TeamCreated(uint256 indexed teamId, string name, address indexed creator);
+    event TeamJoined(uint256 indexed teamId, address indexed member);
 
     // ── Constructor ────────────────────────────────────────────────────
 
-    /**
-     * @param _teamNames Array of team names (e.g. ["Alpha", "Beta", "Gamma"]).
-     *                   Must have at least 2 teams.
-     */
-    constructor(string[] memory _teamNames) {
-        require(_teamNames.length >= 2, "need at least 2 teams");
+    constructor() {
         organizer = msg.sender;
-        for (uint256 i = 0; i < _teamNames.length; i++) {
-            teamNames.push(_teamNames[i]);
-        }
     }
 
     // ── Modifiers ──────────────────────────────────────────────────────
@@ -65,6 +67,41 @@ contract PredictionMarket {
     modifier marketResolved() {
         require(resolved, "market not resolved yet");
         _;
+    }
+
+    // ── Team Functions ─────────────────────────────────────────────────
+
+    /**
+     * @notice Create a new team and become its first member.
+     * @param name The team name.
+     * @return teamId The new team's ID (0-based).
+     */
+    function createTeam(string memory name) external marketOpen returns (uint256 teamId) {
+        require(!hasTeam[msg.sender], "already in a team");
+        require(bytes(name).length > 0, "team name cannot be empty");
+
+        teamId = teamCount;
+        teamNames.push(name);
+        teamCount++;
+        hasTeam[msg.sender] = true;
+        memberOfTeam[msg.sender] = teamId;
+
+        emit TeamCreated(teamId, name, msg.sender);
+        emit TeamJoined(teamId, msg.sender);
+    }
+
+    /**
+     * @notice Join an existing team.
+     * @param teamId The team to join (0-based).
+     */
+    function joinTeam(uint256 teamId) external marketOpen {
+        require(!hasTeam[msg.sender], "already in a team");
+        require(teamId < teamCount, "invalid team id");
+
+        hasTeam[msg.sender] = true;
+        memberOfTeam[msg.sender] = teamId;
+
+        emit TeamJoined(teamId, msg.sender);
     }
 
     // ── Admin Functions ────────────────────────────────────────────────
@@ -85,7 +122,7 @@ contract PredictionMarket {
      * @param _winningTeamId The index of the winning team (0-based).
      */
     function resolve(uint256 _winningTeamId) external onlyOrganizer marketOpen {
-        require(_winningTeamId < teamNames.length, "invalid team id");
+        require(_winningTeamId < teamCount, "invalid team id");
         resolved = true;
         winningTeamId = _winningTeamId;
         emit MarketResolved(_winningTeamId);
@@ -95,12 +132,14 @@ contract PredictionMarket {
 
     /**
      * @notice Place a bet on a team. Deducts from your free balance.
-     *         Can be called multiple times, on any team, before resolution.
+     *         Can be called multiple times, on any team (except your own), before resolution.
      * @param teamId The team index to bet on (0-based).
      * @param amount The amount to bet from your free balance.
      */
     function placeBet(uint256 teamId, uint256 amount) external marketOpen {
-        require(teamId < teamNames.length, "invalid team id");
+        require(hasTeam[msg.sender], "must join or create a team before betting");
+        require(memberOfTeam[msg.sender] != teamId, "cannot bet on your own team");
+        require(teamId < teamCount, "invalid team id");
         require(amount > 0, "amount must be > 0");
         require(balances[msg.sender] >= amount, "insufficient balance");
 
@@ -136,11 +175,11 @@ contract PredictionMarket {
     // ── View Functions ─────────────────────────────────────────────────
 
     function getTeamCount() external view returns (uint256) {
-        return teamNames.length;
+        return teamCount;
     }
 
     function getTeamName(uint256 teamId) external view returns (string memory) {
-        require(teamId < teamNames.length, "invalid team id");
+        require(teamId < teamCount, "invalid team id");
         return teamNames[teamId];
     }
 
@@ -161,6 +200,18 @@ contract PredictionMarket {
     }
 
     /**
+     * @notice Get a wallet's team membership.
+     * @return _hasTeam Whether the wallet has joined/created a team.
+     * @return teamId  The team ID (only meaningful if _hasTeam is true).
+     */
+    function getTeamMembership(address account) external view returns (bool _hasTeam, uint256 teamId) {
+        if (!hasTeam[account]) {
+            return (false, 0);
+        }
+        return (true, memberOfTeam[account]);
+    }
+
+    /**
      * @notice Get the full market state in one call (saves RPC round-trips).
      * @return _resolved     Whether the market has been resolved.
      * @return _winningTeamId The winning team's index (only meaningful if resolved).
@@ -177,7 +228,7 @@ contract PredictionMarket {
             uint256 _totalPool
         )
     {
-        return (resolved, winningTeamId, teamNames.length, totalPool);
+        return (resolved, winningTeamId, teamCount, totalPool);
     }
 
     /**
@@ -190,7 +241,7 @@ contract PredictionMarket {
         view
         returns (uint256[] memory pools, string[] memory names)
     {
-        uint256 count = teamNames.length;
+        uint256 count = teamCount;
         pools = new uint256[](count);
         names = new string[](count);
         for (uint256 i = 0; i < count; i++) {

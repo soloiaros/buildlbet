@@ -3,19 +3,11 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const teamNames = [
-    "Team Alpha",
-    "Team Beta",
-    "Team Gamma",
-    "Team Delta",
-    "Team Epsilon",
-  ];
-
-  console.log("Deploying PredictionMarket with teams:", teamNames);
+  console.log("Deploying PredictionMarket (dynamic teams)");
   console.log("Network:", hre.network.name);
 
   const PredictionMarket = await hre.ethers.getContractFactory("PredictionMarket");
-  const market = await PredictionMarket.deploy(teamNames);
+  const market = await PredictionMarket.deploy();
   await market.waitForDeployment();
 
   const address = await market.getAddress();
@@ -29,7 +21,6 @@ async function main() {
     network: hre.network.name,
     chainId: hre.network.config.chainId,
     deployedAt: new Date().toISOString(),
-    teamNames: teamNames,
   };
 
   const outPath = path.join(__dirname, "..", "deployment.json");
