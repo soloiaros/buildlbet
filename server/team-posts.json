@@ -18,5 +18,13 @@
       "text": "Just pushed the collectible feature!!",
       "updatedAt": 1782567127754
     }
+  ],
+  "3": [
+    {
+      "teamId": 3,
+      "imageBase64": null,
+      "text": "Test post",
+      "updatedAt": 1782574691911
+    }
   ]
 }

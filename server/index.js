@@ -66,12 +66,6 @@ if (process.env.DEMO_WALLETS_JSON) {
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const readContract = new ethers.Contract(deployment.address, deployment.abi, provider);
 
-// Pre-build wallet signers for each demo wallet
-const walletSigners = demoWallets.map((w) => {
-  const wallet = new ethers.Wallet(w.privateKey, provider);
-  return { ...w, wallet, contract: new ethers.Contract(deployment.address, deployment.abi, wallet) };
-});
-
 // Setup organizer signer
 if (!process.env.DEPLOYER_PRIVATE_KEY) {
   console.error("❌ DEPLOYER_PRIVATE_KEY not found in contracts/.env");
@@ -132,10 +126,12 @@ const teamBettors = new Map(); // teamId -> Set<address>
 
 function getWalletById(walletId) {
   const id = parseInt(walletId);
-  if (isNaN(id) || id < 0 || id >= walletSigners.length) {
+  if (isNaN(id) || id < 0 || id >= demoWallets.length) {
     return null;
   }
-  return walletSigners[id];
+  const w = demoWallets[id];
+  const wallet = new ethers.Wallet(w.privateKey, provider);
+  return { ...w, wallet, contract: new ethers.Contract(deployment.address, deployment.abi, wallet) };
 }
 
 // ── Endpoints ───────────────────────────────────────────────────────────
@@ -206,7 +202,7 @@ app.post("/api/create-team", async (req, res) => {
     });
   } catch (err) {
     console.error("Create team error:", err.message);
-    const reason = err.reason || err.shortMessage || err.message;
+    const reason = err.info?.error?.message || err.error?.message || err.reason || err.shortMessage || err.message;
     return res.status(400).json({ error: reason });
   }
 });
@@ -239,7 +235,7 @@ app.post("/api/join-team", async (req, res) => {
     });
   } catch (err) {
     console.error("Join team error:", err.message);
-    const reason = err.reason || err.shortMessage || err.message;
+    const reason = err.info?.error?.message || err.error?.message || err.reason || err.shortMessage || err.message;
     return res.status(400).json({ error: reason });
   }
 });
@@ -260,6 +256,7 @@ app.post("/api/bet", async (req, res) => {
       return res.status(400).json({ error: "Missing teamId or amount" });
     }
 
+    const tx = await w.contract.placeBet(teamId, amount);
     const receipt = await tx.wait();
 
     rpcCache.market.expires = 0;
@@ -272,7 +269,7 @@ app.post("/api/bet", async (req, res) => {
   } catch (err) {
     console.error("Bet error:", err.message);
     // Extract revert reason if available
-    const reason = err.reason || err.shortMessage || err.message;
+    const reason = err.info?.error?.message || err.error?.message || err.reason || err.shortMessage || err.message;
     return res.status(400).json({ error: reason });
   }
 });
@@ -302,7 +299,7 @@ app.post("/api/claim-payout", async (req, res) => {
     });
   } catch (err) {
     console.error("Claim error:", err.message);
-    const reason = err.reason || err.shortMessage || err.message;
+    const reason = err.info?.error?.message || err.error?.message || err.reason || err.shortMessage || err.message;
     return res.status(400).json({ error: reason });
   }
 });
@@ -551,7 +548,7 @@ app.post("/api/claim-collectible", async (req, res) => {
     });
   } catch (err) {
     console.error("Claim collectible error:", err.message);
-    const reason = err.reason || err.shortMessage || err.message;
+    const reason = err.info?.error?.message || err.error?.message || err.reason || err.shortMessage || err.message;
     return res.status(400).json({ error: reason });
   }
 });
