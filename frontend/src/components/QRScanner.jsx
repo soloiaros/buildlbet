@@ -1,16 +1,34 @@
 import React, { useEffect, useRef } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 import { X } from "lucide-react";
 
 export default function QRScanner({ onScan, onClose }) {
   const scannerRef = useRef(null);
 
   useEffect(() => {
+    // Prevent double-initialization in React StrictMode
+    if (scannerRef.current) return;
+
     // We delay slightly to ensure the DOM element is ready for the scanner
     const timer = setTimeout(() => {
+      if (scannerRef.current) return;
       const html5QrcodeScanner = new Html5QrcodeScanner(
         "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { 
+          fps: 10, 
+          // Responsive qrbox: ensures it doesn't overflow narrow iOS screens causing OverconstrainedError
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            return {
+              width: Math.floor(minEdge * 0.7),
+              height: Math.floor(minEdge * 0.7)
+            };
+          },
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA, Html5QrcodeScanType.SCAN_TYPE_FILE],
+          videoConstraints: {
+            facingMode: "environment"
+          }
+        },
         /* verbose= */ false
       );
       
@@ -26,12 +44,13 @@ export default function QRScanner({ onScan, onClose }) {
       );
       
       scannerRef.current = html5QrcodeScanner;
-    }, 100);
+    }, 50);
 
     return () => {
       clearTimeout(timer);
       if (scannerRef.current) {
         scannerRef.current.clear().catch(e => console.error("Failed to clear scanner", e));
+        scannerRef.current = null;
       }
     };
   }, [onScan]);
