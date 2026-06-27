@@ -80,6 +80,17 @@ export async function fetchRecentPosts() {
   return request("/api/recent-posts");
 }
 
+export async function claimCollectible(walletId) {
+  return request("/api/claim-collectible", {
+    method: "POST",
+    body: JSON.stringify({ walletId }),
+  });
+}
+
+export async function fetchCards(walletId) {
+  return request(`/api/cards/${walletId}`);
+}
+
 /** Get full market state (teams, pools, odds, resolution) */
 export async function fetchMarket() {
   return request("/api/market");

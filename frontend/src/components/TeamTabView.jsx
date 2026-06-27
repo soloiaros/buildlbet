@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import TeamSetup from "./TeamSetup";
 import { fetchTeamPost, publishTeamPost } from "../api";
 import { ImagePlus, Send, RefreshCcw } from "lucide-react";
+import CollectibleCard from "./CollectibleCard";
 import "./TeamTabView.css";
 
 export default function TeamTabView({ wallet, market, userBalance, onRefresh }) {
@@ -10,6 +11,7 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
+  const [cardToReveal, setCardToReveal] = useState(null);
   const fileInputRef = useRef(null);
 
   // Load the current post for this team
@@ -73,6 +75,10 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
         setPreview(null);
         setText("");
         if (fileInputRef.current) fileInputRef.current.value = "";
+        
+        if (res.awardedNewCard) {
+          setCardToReveal(1); // THREE_POSTS_CARD
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -181,6 +187,13 @@ export default function TeamTabView({ wallet, market, userBalance, onRefresh }) 
             ))}
           </div>
         </div>
+      )}
+
+      {cardToReveal !== null && (
+        <CollectibleCard 
+          cardId={cardToReveal} 
+          onClaim={() => setCardToReveal(null)} 
+        />
       )}
     </div>
   );

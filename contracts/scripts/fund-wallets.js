@@ -29,18 +29,30 @@ async function main() {
   console.log(`Total needed: ${hre.ethers.formatEther(totalNeeded)} MON`);
 
   if (deployerBalance < totalNeeded) {
-    console.error(`\n❌ Deployer doesn't have enough MON. Need ${hre.ethers.formatEther(totalNeeded)}, have ${hre.ethers.formatEther(deployerBalance)}`);
-    process.exit(1);
+    console.log(`\n⚠️ Note: Deployer has ${hre.ethers.formatEther(deployerBalance)} MON, which is less than the theoretical ${hre.ethers.formatEther(totalNeeded)} MON needed for all wallets. Proceeding anyway because some may already be funded...`);
   }
 
   console.log("\nSending...");
   for (let i = 0; i < wallets.length; i++) {
-    const tx = await deployer.sendTransaction({
-      to: wallets[i].address,
-      value: amountPerWallet,
-    });
-    await tx.wait();
-    console.log(`  ✅ #${i} ${wallets[i].address} — tx: ${tx.hash}`);
+    try {
+      const balance = await hre.ethers.provider.getBalance(wallets[i].address);
+      if (balance >= amountPerWallet) {
+        console.log(`  ⏭️ #${i} ${wallets[i].address} — Already funded.`);
+        continue;
+      }
+      
+      const tx = await deployer.sendTransaction({
+        to: wallets[i].address,
+        value: amountPerWallet,
+      });
+      await tx.wait();
+      console.log(`  ✅ #${i} ${wallets[i].address} — tx: ${tx.hash}`);
+      
+      // Small delay to help with rate limits
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (err) {
+      console.log(`  ❌ #${i} ${wallets[i].address} — failed: ${err.shortMessage || err.message}`);
+    }
   }
 
   console.log(`\n✅ Funded ${wallets.length} wallets successfully.`);

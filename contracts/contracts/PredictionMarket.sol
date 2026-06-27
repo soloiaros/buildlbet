@@ -45,6 +45,17 @@ contract PredictionMarket {
     event PayoutClaimed(address indexed claimant, uint256 amount);
     event TeamCreated(uint256 indexed teamId, string name, address indexed creator);
     event TeamJoined(uint256 indexed teamId, address indexed member);
+    event CardAwarded(address indexed wallet, uint256 cardId);
+
+    // ── Collectible Cards State ────────────────────────────────────────
+
+    // wallet => cardId => owns flag
+    mapping(address => mapping(uint256 => bool)) public ownsCard;
+    // wallet => total posts published
+    mapping(address => uint256) public postCount;
+
+    uint256 public constant JOIN_CARD = 0;
+    uint256 public constant THREE_POSTS_CARD = 1;
 
     // ── Constructor ────────────────────────────────────────────────────
 
@@ -126,6 +137,27 @@ contract PredictionMarket {
         resolved = true;
         winningTeamId = _winningTeamId;
         emit MarketResolved(_winningTeamId);
+    }
+
+    /**
+     * @notice Award the JOIN_CARD for scanning the venue QR code.
+     */
+    function awardJoinCard(address wallet) external onlyOrganizer {
+        if (!ownsCard[wallet][JOIN_CARD]) {
+            ownsCard[wallet][JOIN_CARD] = true;
+            emit CardAwarded(wallet, JOIN_CARD);
+        }
+    }
+
+    /**
+     * @notice Record a published post. Automatically award THREE_POSTS_CARD on the 3rd post.
+     */
+    function recordPost(address wallet) external onlyOrganizer {
+        postCount[wallet]++;
+        if (postCount[wallet] == 3) {
+            ownsCard[wallet][THREE_POSTS_CARD] = true;
+            emit CardAwarded(wallet, THREE_POSTS_CARD);
+        }
     }
 
     // ── Bettor Functions ───────────────────────────────────────────────
@@ -248,5 +280,13 @@ contract PredictionMarket {
             pools[i] = teamPools[i];
             names[i] = teamNames[i];
         }
+    }
+
+    /**
+     * @notice Get owned cards for a wallet.
+     */
+    function getOwnedCards(address wallet) external view returns (bool[2] memory cards) {
+        cards[0] = ownsCard[wallet][JOIN_CARD];
+        cards[1] = ownsCard[wallet][THREE_POSTS_CARD];
     }
 }

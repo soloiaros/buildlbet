@@ -13,6 +13,9 @@ const { ethers } = require("ethers");
 const fs = require("fs");
 const path = require("path");
 
+// Load contracts/.env for DEPLOYER_PRIVATE_KEY
+require("dotenv").config({ path: path.join(__dirname, "..", "contracts", ".env") });
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
@@ -48,6 +51,14 @@ const walletSigners = demoWallets.map((w) => {
   const wallet = new ethers.Wallet(w.privateKey, provider);
   return { ...w, wallet, contract: new ethers.Contract(deployment.address, deployment.abi, wallet) };
 });
+
+// Setup organizer signer
+if (!process.env.DEPLOYER_PRIVATE_KEY) {
+  console.error("❌ DEPLOYER_PRIVATE_KEY not found in contracts/.env");
+  process.exit(1);
+}
+const organizerWallet = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
+const organizerContract = new ethers.Contract(deployment.address, deployment.abi, organizerWallet);
 
 // Track which wallets have been claimed (in-memory, resets on restart)
 const claimedWallets = new Set();
@@ -407,7 +418,26 @@ app.post("/api/team-post", async (req, res) => {
     teamPosts[tId].push(newPost);
     saveTeamPosts(); // Persist to disk
 
-    return res.json({ success: true, post: newPost });
+    // Try to record the post for collectible card logic (ignore failure if it happens)
+    let awardedNewCard = false;
+    try {
+      const recordTx = await organizerContract.recordPost(w.address);
+      const recordReceipt = await recordTx.wait();
+      // Check if CardAwarded was emitted (ID 1 = THREE_POSTS_CARD)
+      const event = recordReceipt.logs.find(log => {
+        try {
+          const parsed = organizerContract.interface.parseLog(log);
+          return parsed.name === "CardAwarded" && parsed.args.cardId === 1n;
+        } catch(e) { return false; }
+      });
+      if (event) {
+        awardedNewCard = true;
+      }
+    } catch (err) {
+      console.error("Failed to record post on-chain, but saved off-chain:", err.message);
+    }
+
+    return res.json({ success: true, post: newPost, awardedNewCard });
   } catch (err) {
     console.error("Post error:", err);
     return res.status(500).json({ error: "Failed to save post" });
@@ -447,6 +477,62 @@ app.get("/api/recent-posts", async (req, res) => {
   } catch (err) {
     console.error("Fetch recent posts error:", err);
     return res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+/**
+ * GET /api/cards/:walletId
+ */
+app.get("/api/cards/:walletId", async (req, res) => {
+  const walletId = req.params.walletId;
+  try {
+    const w = getWalletById(walletId);
+    if (!w) return res.status(400).json({ error: "Invalid wallet ID" });
+
+    const cards = await readContract.getOwnedCards(w.address);
+    return res.json({
+      joinCard: cards[0],
+      threePostsCard: cards[1]
+    });
+  } catch (err) {
+    console.error("Cards read error:", err.message);
+    return res.status(500).json({ error: "Failed to read cards" });
+  }
+});
+
+/**
+ * POST /api/claim-collectible
+ */
+app.post("/api/claim-collectible", async (req, res) => {
+  try {
+    const { walletId } = req.body;
+    const w = getWalletById(walletId);
+    if (!w) return res.status(400).json({ error: "Invalid wallet ID" });
+
+    const tx = await organizerContract.awardJoinCard(w.address);
+    const receipt = await tx.wait();
+
+    // Check if a new card was actually awarded vs already owned
+    let alreadyOwned = true;
+    const event = receipt.logs.find(log => {
+      try {
+        const parsed = organizerContract.interface.parseLog(log);
+        return parsed.name === "CardAwarded" && parsed.args.cardId === 0n;
+      } catch(e) { return false; }
+    });
+    if (event) {
+      alreadyOwned = false;
+    }
+
+    return res.json({
+      success: true,
+      alreadyOwned,
+      txHash: receipt.hash,
+    });
+  } catch (err) {
+    console.error("Claim collectible error:", err.message);
+    const reason = err.reason || err.shortMessage || err.message;
+    return res.status(400).json({ error: reason });
   }
 });
 
