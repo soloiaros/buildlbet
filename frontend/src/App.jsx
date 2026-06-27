@@ -43,7 +43,7 @@ export default function App() {
       }
     };
     poll();
-    const interval = setInterval(poll, currentTab === "dashboard" ? 3000 : 5000);
+    const interval = setInterval(poll, currentTab === "dashboard" ? 5000 : 10000);
     return () => {
       active = false;
       clearInterval(interval);
@@ -63,7 +63,7 @@ export default function App() {
       }
     };
     poll();
-    const interval = setInterval(poll, 5000);
+    const interval = setInterval(poll, 10000);
     return () => {
       active = false;
       clearInterval(interval);

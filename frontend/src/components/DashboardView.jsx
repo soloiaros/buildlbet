@@ -105,48 +105,69 @@ export default function DashboardView({ market }) {
 
       {/* Actual Graph */}
       <div className="brutal-card dashboard-content">
-        <ResponsiveContainer width="100%" height="100%" minHeight={400}>
-          <BarChart
-            data={market.teams}
-            margin={{ top: 40, right: 20, left: 20, bottom: 40 }}
-          >
-            <XAxis
-              dataKey="name"
-              axisLine={{ stroke: "black", strokeWidth: 4 }}
-              tickLine={{ stroke: "black", strokeWidth: 4 }}
-              tick={{ fill: "black", fontSize: 16, fontWeight: 900, fontFamily: "Space Grotesk" }}
-              dy={16}
-            />
-            <YAxis
-              hide
-              domain={[0, 'dataMax']}
-            />
-            <Tooltip
-              content={<BrutalTooltip />}
-              cursor={{ fill: "rgba(0,0,0,0.05)" }}
-            />
-            <Bar
-              dataKey="pool"
-              isAnimationActive={true}
-              animationDuration={1500}
-              animationEasing="ease-out"
-              stroke="black"
-              strokeWidth={4}
+        {(!market.teams || market.teams.length === 0 || market.totalPool === 0) ? (
+          <div className="dashboard-empty-state" style={{ 
+            height: '100%', 
+            minHeight: '400px', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            textAlign: 'center',
+            gap: '16px'
+          }}>
+            <div style={{ fontSize: '4rem' }}>🤔</div>
+            <h2 style={{ fontFamily: 'var(--font-family)', fontWeight: 900, margin: 0 }}>NO BETS YET</h2>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '300px', margin: 0 }}>
+              {market.teams && market.teams.length > 0 
+                ? "Teams are registered but nobody has placed a bet yet. Be the first!"
+                : "Waiting for teams to join the hackathon and create their profiles!"}
+            </p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%" minHeight={400}>
+            <BarChart
+              data={market.teams}
+              margin={{ top: 40, right: 20, left: 20, bottom: 40 }}
             >
-              {market.teams.map((entry, index) => {
-                const isWinner = market.resolved && entry.id === market.winningTeamId;
-                const isLoser = market.resolved && !isWinner;
-                return (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={BAR_COLORS[index % BAR_COLORS.length]}
-                    opacity={isLoser ? 0.4 : 1}
-                  />
-                );
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              <XAxis
+                dataKey="name"
+                axisLine={{ stroke: "black", strokeWidth: 4 }}
+                tickLine={{ stroke: "black", strokeWidth: 4 }}
+                tick={{ fill: "black", fontSize: 16, fontWeight: 900, fontFamily: "Space Grotesk" }}
+                dy={16}
+              />
+              <YAxis
+                hide
+                domain={[0, 'dataMax']}
+              />
+              <Tooltip
+                content={<BrutalTooltip />}
+                cursor={{ fill: "rgba(0,0,0,0.05)" }}
+              />
+              <Bar
+                dataKey="pool"
+                isAnimationActive={true}
+                animationDuration={1500}
+                animationEasing="ease-out"
+                stroke="black"
+                strokeWidth={4}
+              >
+                {market.teams.map((entry, index) => {
+                  const isWinner = market.resolved && entry.id === market.winningTeamId;
+                  const isLoser = market.resolved && !isWinner;
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={BAR_COLORS[index % BAR_COLORS.length]}
+                      opacity={isLoser ? 0.4 : 1}
+                    />
+                  );
+                })}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Recent Posts */}

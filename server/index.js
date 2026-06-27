@@ -52,9 +52,20 @@ const walletSigners = demoWallets.map((w) => {
 // Track which wallets have been claimed (in-memory, resets on restart)
 const claimedWallets = new Set();
 
-// Track team posts (in-memory)
-// { teamId: { imageBase64, text, updatedAt } }
-const teamPosts = {};
+// Track team posts (persistent in a JSON file)
+const postsFilePath = path.join(__dirname, "team-posts.json");
+let teamPosts = {};
+if (fs.existsSync(postsFilePath)) {
+  try {
+    teamPosts = JSON.parse(fs.readFileSync(postsFilePath, "utf8"));
+  } catch (e) {
+    console.error("Failed to parse team-posts.json:", e);
+  }
+}
+
+function saveTeamPosts() {
+  fs.writeFileSync(postsFilePath, JSON.stringify(teamPosts, null, 2), "utf8");
+}
 
 // Track distinct bettors per team
 const teamBettors = new Map(); // teamId -> Set<address>
@@ -153,6 +164,9 @@ app.post("/api/create-team", async (req, res) => {
     const tx = await w.contract.createTeam(name.trim());
     const receipt = await tx.wait();
 
+    rpcCache.market.expires = 0;
+    rpcCache.balance[walletId] = null; // Invalidate balance cache
+
     // To get the teamId, we can parse the TeamCreated event, but it's simpler
     // to just let the frontend refresh the market state to see the new team.
     return res.json({
@@ -185,6 +199,9 @@ app.post("/api/join-team", async (req, res) => {
     const tx = await w.contract.joinTeam(teamId);
     const receipt = await tx.wait();
 
+    rpcCache.market.expires = 0;
+    rpcCache.balance[walletId] = null; // Invalidate balance cache
+
     return res.json({
       success: true,
       txHash: receipt.hash,
@@ -212,8 +229,10 @@ app.post("/api/bet", async (req, res) => {
       return res.status(400).json({ error: "Missing teamId or amount" });
     }
 
-    const tx = await w.contract.placeBet(teamId, amount);
     const receipt = await tx.wait();
+
+    rpcCache.market.expires = 0;
+    rpcCache.balance[walletId] = null; // Invalidate balance cache
 
     return res.json({
       success: true,
@@ -242,6 +261,9 @@ app.post("/api/claim-payout", async (req, res) => {
 
     const tx = await w.contract.claimPayout();
     const receipt = await tx.wait();
+
+    rpcCache.market.expires = 0;
+    rpcCache.balance[walletId] = null; // Invalidate balance cache
 
     return res.json({
       success: true,
@@ -294,7 +316,7 @@ app.get("/api/market", async (req, res) => {
     };
     
     rpcCache.market.data = responseData;
-    rpcCache.market.expires = Date.now() + 3000; // cache for 3s
+    rpcCache.market.expires = Date.now() + 5000; // cache for 5s
     
     return res.json(responseData);
   } catch (err) {
@@ -346,7 +368,7 @@ app.get("/api/balance/:walletId", async (req, res) => {
 
     rpcCache.balance[walletId] = {
       data: responseData,
-      expires: Date.now() + 3000
+      expires: Date.now() + 10000 // cache for 10s (invalidates on write)
     };
 
     return res.json(responseData);
@@ -383,6 +405,7 @@ app.post("/api/team-post", async (req, res) => {
     };
     
     teamPosts[tId].push(newPost);
+    saveTeamPosts(); // Persist to disk
 
     return res.json({ success: true, post: newPost });
   } catch (err) {
