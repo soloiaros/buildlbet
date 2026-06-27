@@ -6,6 +6,30 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  padding: 24px;
+  background: white;
+  color: black;
+  border-radius: 12px;
+  border: 4px solid black;
+  box-shadow: 8px 8px 0px black;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dot pattern for the brutalist background */
+.cards-carousel-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 2px, transparent 2px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.carousel-header, .carousel-track {
+  position: relative;
+  z-index: 1;
 }
 
 .carousel-header {
@@ -23,10 +47,9 @@
 
 .carousel-track {
   display: flex;
-  gap: 24px;
+  gap: 32px;
   overflow-x: auto;
-  padding: 8px;
-  padding-bottom: 24px;
+  padding: 32px 40px 64px 40px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   width: 100%;
@@ -37,16 +60,11 @@
   scroll-snap-align: center;
 }
 
-/* Hide scrollbar for cleaner look */
+/* Hide scrollbar completely */
 .carousel-track::-webkit-scrollbar {
-  height: 8px;
+  display: none;
 }
-.carousel-track::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border: 2px solid black;
-  border-radius: 4px;
-}
-.carousel-track::-webkit-scrollbar-thumb {
-  background: black;
-  border-radius: 4px;
+.carousel-track {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
