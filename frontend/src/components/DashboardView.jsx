@@ -116,9 +116,9 @@ export default function DashboardView({ market, wallet }) {
     <div className="dashboard-container">
       {/* Header */}
       <header className="brutal-card dashboard-header">
-        <h1 className="dashboard-title">
+        <h1 className="dashboard-title" style={{ flexWrap: 'wrap' }}>
           <Zap size={40} className="animate-pulse" /> 
-          Event: <span style={{ color: 'var(--accent-pink)', fontFamily: 'Space Grotesk' }}>BuilderMare</span>
+          Event: <span style={{ color: 'var(--accent-pink)', fontFamily: 'var(--font-family)', border: '4px dashed var(--accent-pink)', padding: '4px 12px', borderRadius: '8px', background: '#fff', transform: 'rotate(-2deg)', display: 'inline-block', marginLeft: '8px' }}>BuilderMare</span>
         </h1>
         <div className="dashboard-total">
           <span className="dashboard-total-label">TOTAL POOL</span>
