@@ -1,26 +1,16 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import attendeeImg from "../assets/attendee_card.png";
+import builderImg from "../assets/builder_card.png";
 import "./CollectibleCard.css";
 
 // 0 = JOIN_CARD, 1 = THREE_POSTS_CARD
 const CARD_DATA = {
   0: {
-    title: "EARLY ADOPTER",
-    subtitle: "Venue Scan",
-    color: "var(--accent-amber)",
-    gradient: "linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)",
-    emoji: "🔥",
-    stat: "1st",
-    desc: "You proved you were here."
+    image: attendeeImg
   },
   1: {
-    title: "SERIAL SHIPPER",
-    subtitle: "3 Posts Published",
-    color: "var(--accent-cyan)",
-    gradient: "linear-gradient(135deg, #00ffff 0%, #ff00ff 100%)",
-    emoji: "🚀",
-    stat: "3",
-    desc: "Shipping at hackathon speeds."
+    image: builderImg
   }
 };
 
@@ -71,11 +61,12 @@ export default function CollectibleCard({ cardId, onClaim }) {
             animate={{ rotateX, rotateY }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             style={{ 
-              background: data.gradient,
               boxShadow: `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.5)`,
-              border: `4px solid ${data.color}`
+              border: `4px solid black`
             }}
           >
+            <img src={data.image} alt="Collectible" className="card-image" />
+            
             {/* Holographic shifting layer */}
             {interactive && (
               <div 
@@ -85,26 +76,6 @@ export default function CollectibleCard({ cardId, onClaim }) {
                 }}
               />
             )}
-            
-            <div className="card-inner">
-              <div className="card-header">
-                <h2>{data.title}</h2>
-                <span>{data.subtitle}</span>
-              </div>
-              
-              <div className="card-art" style={{ borderColor: data.color }}>
-                <span className="card-emoji">{data.emoji}</span>
-              </div>
-              
-              <div className="card-stats">
-                <div className="stat-box">
-                  <span className="stat-label">LEVEL</span>
-                  <span className="stat-value">{data.stat}</span>
-                </div>
-              </div>
-              
-              <p className="card-desc">{data.desc}</p>
-            </div>
           </motion.div>
 
           {interactive && (

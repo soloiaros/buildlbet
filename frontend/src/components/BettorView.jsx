@@ -6,6 +6,8 @@ import CollectibleCard from "./CollectibleCard";
 import { placeBet, claimPayout, claimCollectible, fetchCards } from "../api";
 import { Sparkles, Dice5, Wallet, Coins, ArrowRight, CheckCircle2, Frown, Trophy, Camera } from "lucide-react";
 import { useEffect } from "react";
+import attendeeImg from "../assets/attendee_card.png";
+import builderImg from "../assets/builder_card.png";
 import "./BettorView.css";
 
 export default function BettorView({
@@ -163,8 +165,16 @@ export default function BettorView({
         <div>
           <h3 style={{ margin: 0, fontFamily: 'var(--font-family)', fontWeight: 900 }}>COLLECTION</h3>
           <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-            <div style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, background: ownedCards?.joinCard ? 'var(--accent-amber)' : '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: ownedCards?.joinCard ? 'none' : 'grayscale(1) opacity(0.5)' }}>🔥</div>
-            <div style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, background: ownedCards?.threePostsCard ? 'var(--accent-cyan)' : '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', filter: ownedCards?.threePostsCard ? 'none' : 'grayscale(1) opacity(0.5)' }}>🚀</div>
+            <img 
+              src={attendeeImg} 
+              alt="Attendee Card" 
+              style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, objectFit: 'cover', filter: ownedCards?.joinCard ? 'none' : 'grayscale(1) opacity(0.5)' }} 
+            />
+            <img 
+              src={builderImg} 
+              alt="Builder Card" 
+              style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, objectFit: 'cover', filter: ownedCards?.threePostsCard ? 'none' : 'grayscale(1) opacity(0.5)' }} 
+            />
           </div>
         </div>
         {!ownedCards?.joinCard && (
