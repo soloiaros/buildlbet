@@ -114,7 +114,7 @@ export default function App() {
   return (
     <>
       {currentTab === "dashboard" && (
-        <DashboardView market={market} />
+        <DashboardView market={market} wallet={wallet} />
       )}
       {currentTab === "bet" && (
         <BettorView

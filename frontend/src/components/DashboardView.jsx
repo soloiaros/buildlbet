@@ -9,8 +9,11 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
-import { fetchRecentPosts } from "../api";
+import { fetchRecentPosts, fetchCards, claimCollectible } from "../api";
 import { motion, AnimatePresence } from "framer-motion";
+import CardsCarousel from "./CardsCarousel";
+import QRScanner from "./QRScanner";
+import CollectibleCard from "./CollectibleCard";
 import "./DashboardView.css";
 
 const BAR_COLORS = [
@@ -37,9 +40,40 @@ const BrutalTooltip = ({ active, payload }) => {
   return null;
 };
 
-export default function DashboardView({ market }) {
+export default function DashboardView({ market, wallet }) {
   const [recentPosts, setRecentPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+
+  // Cards state
+  const [ownedCards, setOwnedCards] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [claimingCard, setClaimingCard] = useState(false);
+  const [cardToReveal, setCardToReveal] = useState(null);
+
+  useEffect(() => {
+    if (wallet?.walletId !== undefined) {
+      fetchCards(wallet.walletId).then(setOwnedCards).catch(console.error);
+    }
+  }, [wallet?.walletId]);
+
+  const handleScan = async (text) => {
+    setShowScanner(false);
+    if (ownedCards?.joinCard) return; // already have it
+    setClaimingCard(true);
+    try {
+      const res = await claimCollectible(wallet.walletId);
+      if (!res.alreadyOwned) {
+        setCardToReveal(0); // JOIN_CARD
+        setOwnedCards(prev => ({ ...prev, joinCard: true }));
+      } else {
+        alert("Already claimed this collectible!");
+      }
+    } catch (e) {
+      alert("Failed to claim: " + e.message);
+    } finally {
+      setClaimingCard(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -83,7 +117,8 @@ export default function DashboardView({ market }) {
       {/* Header */}
       <header className="brutal-card dashboard-header">
         <h1 className="dashboard-title">
-          <Zap size={40} className="animate-pulse" /> LIVE PREDICTION MARKET
+          <Zap size={40} className="animate-pulse" /> 
+          Event: <span style={{ color: 'var(--accent-pink)', fontFamily: 'Space Grotesk' }}>BuilderMare</span>
         </h1>
         <div className="dashboard-total">
           <span className="dashboard-total-label">TOTAL POOL</span>
@@ -92,6 +127,15 @@ export default function DashboardView({ market }) {
           </span>
         </div>
       </header>
+
+      {/* Collectibles Carousel */}
+      {wallet && (
+        <CardsCarousel 
+          ownedCards={ownedCards} 
+          claimingCard={claimingCard} 
+          onClaimClick={() => setShowScanner(true)} 
+        />
+      )}
 
       {/* Resolution Banner */}
       {market.resolved && (
@@ -235,6 +279,15 @@ export default function DashboardView({ market }) {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Collectible Scanner & Reveal */}
+      {showScanner && (
+        <QRScanner onScan={handleScan} onClose={() => setShowScanner(false)} />
+      )}
+      
+      {cardToReveal !== null && (
+        <CollectibleCard cardId={cardToReveal} onClaim={() => setCardToReveal(null)} />
+      )}
 
     </div>
   );

@@ -1,13 +1,8 @@
 import { useState } from "react";
 import TeamCard from "./TeamCard";
 import BetModal from "./BetModal";
-import QRScanner from "./QRScanner";
-import CollectibleCard from "./CollectibleCard";
-import { placeBet, claimPayout, claimCollectible, fetchCards } from "../api";
-import { Sparkles, Dice5, Wallet, Coins, ArrowRight, CheckCircle2, Frown, Trophy, Camera } from "lucide-react";
-import { useEffect } from "react";
-import attendeeImg from "../assets/attendee_card.png";
-import builderImg from "../assets/builder_card.png";
+import { placeBet, claimPayout } from "../api";
+import { Sparkles, Dice5, Wallet, Coins, ArrowRight, CheckCircle2, Frown, Trophy } from "lucide-react";
 import "./BettorView.css";
 
 export default function BettorView({
@@ -24,36 +19,6 @@ export default function BettorView({
   const [betResult, setBetResult] = useState(null);
   const [claimPending, setClaimPending] = useState(false);
   const [claimResult, setClaimResult] = useState(null);
-
-  const [ownedCards, setOwnedCards] = useState(null);
-  const [showScanner, setShowScanner] = useState(false);
-  const [claimingCard, setClaimingCard] = useState(false);
-  const [cardToReveal, setCardToReveal] = useState(null);
-
-  useEffect(() => {
-    if (wallet?.walletId !== undefined) {
-      fetchCards(wallet.walletId).then(setOwnedCards).catch(console.error);
-    }
-  }, [wallet?.walletId]);
-
-  const handleScan = async (text) => {
-    setShowScanner(false);
-    if (ownedCards?.joinCard) return; // already have it
-    setClaimingCard(true);
-    try {
-      const res = await claimCollectible(wallet.walletId);
-      if (!res.alreadyOwned) {
-        setCardToReveal(0); // JOIN_CARD
-        setOwnedCards(prev => ({ ...prev, joinCard: true }));
-      } else {
-        alert("Already claimed this collectible!");
-      }
-    } catch (e) {
-      alert("Failed to claim: " + e.message);
-    } finally {
-      setClaimingCard(false);
-    }
-  };
 
   // ── Wallet Claim Screen ────────────────────────────────────────
   if (!wallet) {
@@ -151,7 +116,7 @@ export default function BettorView({
     <div className="bettor-container">
       {/* Header */}
       <header className="bettor-header animate-fade-in">
-        <h1 className="bettor-title">PREDICTION MARKET</h1>
+        <h1 className="bettor-title">BuildlBet</h1>
         <div className="wallet-info brutal-card">
           <Wallet size={16} />
           <div className="wallet-address" title={wallet.address}>
@@ -159,30 +124,6 @@ export default function BettorView({
           </div>
         </div>
       </header>
-
-      {/* Cards Collection */}
-      <div className="brutal-card cards-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h3 style={{ margin: 0, fontFamily: 'var(--font-family)', fontWeight: 900 }}>COLLECTION</h3>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-            <img 
-              src={attendeeImg} 
-              alt="Attendee Card" 
-              style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, objectFit: 'cover', filter: ownedCards?.joinCard ? 'none' : 'grayscale(1) opacity(0.5)' }} 
-            />
-            <img 
-              src={builderImg} 
-              alt="Builder Card" 
-              style={{ width: 40, height: 50, border: '2px solid black', borderRadius: 4, objectFit: 'cover', filter: ownedCards?.threePostsCard ? 'none' : 'grayscale(1) opacity(0.5)' }} 
-            />
-          </div>
-        </div>
-        {!ownedCards?.joinCard && (
-          <button className="btn btn-secondary" onClick={() => setShowScanner(true)} disabled={claimingCard}>
-            {claimingCard ? <span className="spinner" /> : <><Camera size={16} /> CLAIM</>}
-          </button>
-        )}
-      </div>
 
       {/* Balance Card */}
       <div className="brutal-card balance-card">
@@ -300,15 +241,6 @@ export default function BettorView({
             setBetResult(null);
           }}
         />
-      )}
-
-      {/* Collectible Scanner & Reveal */}
-      {showScanner && (
-        <QRScanner onScan={handleScan} onClose={() => setShowScanner(false)} />
-      )}
-      
-      {cardToReveal !== null && (
-        <CollectibleCard cardId={cardToReveal} onClaim={() => setCardToReveal(null)} />
       )}
     </div>
   );
