@@ -1,215 +1,258 @@
 .bettor-container {
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 16px 16px 100px;
-  min-height: 100dvh;
+  padding: 24px 16px 80px;
+  width: 100%;
 }
 
-/* ── Claim Screen ───────────────────────────────────────────────── */
+.claim-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
 .claim-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80dvh;
+  padding: 40px 24px;
   text-align: center;
-  padding: 24px;
+  background: var(--accent-amber);
 }
 
 .claim-icon {
-  font-size: 4rem;
-  margin-bottom: 16px;
+  background: white;
+  border: 4px solid var(--border-color);
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 6px 6px 0px var(--shadow-color);
 }
 
 .claim-title {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 8px;
+  font-size: 2.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
 
 .claim-subtitle {
-  color: var(--text-secondary);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 32px;
-  max-width: 300px;
+  opacity: 0.9;
 }
 
 .claim-btn {
   width: 100%;
-  max-width: 280px;
-  padding: 16px 32px;
-  font-size: 1.1rem;
-}
-
-.claim-error {
-  color: var(--accent-red);
-  margin-top: 12px;
-  font-size: 0.9rem;
+  max-width: 300px;
+  padding: 16px;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
 }
 
 .claim-note {
-  color: var(--text-muted);
-  margin-top: 24px;
-  font-size: 0.8rem;
-  max-width: 280px;
-  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  max-width: 300px;
+  padding: 12px;
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
 }
 
-/* ── Header ─────────────────────────────────────────────────────── */
 .bettor-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 8px 0 16px;
+  align-items: center;
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 4px 4px 0px var(--shadow-color);
 }
 
 .bettor-title {
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--accent-purple);
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 2px 2px 0px var(--shadow-color) !important;
+  background: var(--accent-cyan) !important;
 }
 
 .wallet-address {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  color: var(--text-secondary);
+  font-family: monospace;
+  font-size: 0.9rem;
 }
 
-/* ── Balance Card ───────────────────────────────────────────────── */
 .balance-card {
-  padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+  padding: 24px;
 }
 
 .balance-row {
   display: flex;
   align-items: center;
-  gap: 20px;
-}
-
-.balance-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.balance-label {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-.balance-value {
-  font-size: 1.8rem;
-  font-weight: 800;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.balance-staked {
-  background: none;
-  -webkit-text-fill-color: var(--text-secondary);
-  font-size: 1.5rem;
+  justify-content: space-between;
 }
 
 .balance-divider {
-  width: 1px;
-  height: 40px;
-  background: var(--border-glass);
+  width: 4px;
+  height: 48px;
+  background: var(--border-color);
+  border-radius: 2px;
 }
 
-/* ── Resolution Banner ──────────────────────────────────────────── */
-.resolution-banner {
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  text-align: center;
-  margin-bottom: 20px;
+.balance-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
 }
 
-.resolution-win {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(34, 211, 238, 0.08));
-  border: 1px solid rgba(52, 211, 153, 0.2);
+.balance-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  opacity: 0.7;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
 }
 
-.resolution-lose {
-  background: linear-gradient(135deg, rgba(248, 113, 113, 0.08), rgba(251, 191, 36, 0.05));
-  border: 1px solid rgba(248, 113, 113, 0.15);
+.balance-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 2rem;
+  font-weight: 900;
 }
 
-.resolution-emoji {
-  font-size: 2.5rem;
+.balance-staked {
+  color: var(--text-muted);
+}
+
+.teams-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
-.resolution-banner h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.resolution-detail {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.resolution-detail strong {
-  color: var(--accent-green);
-  font-weight: 700;
-}
-
-.claim-payout-btn {
-  margin-top: 16px;
-  width: 100%;
-  max-width: 240px;
-  padding: 14px 24px;
-}
-
-/* ── Teams Section ──────────────────────────────────────────────── */
 .section-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-align: center;
 }
 
 .teams-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .loading-state {
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  font-weight: 800;
+  font-size: 1.2rem;
+  background: var(--bg-card);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0px var(--shadow-color);
 }
 
-/* ── Bet Toast ──────────────────────────────────────────────────── */
-.bet-toast {
-  background: rgba(52, 211, 153, 0.1);
-  border: 1px solid rgba(52, 211, 153, 0.25);
-  color: var(--accent-green);
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
+.resolution-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  font-weight: 600;
-  font-size: 0.9rem;
+  padding: 32px 24px;
+  margin-bottom: 32px;
+  animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.resolution-win {
+  background: var(--accent-green);
+}
+
+.resolution-lose {
+  background: var(--text-muted);
+  color: white;
+}
+
+.resolution-emoji {
+  background: white;
+  border: 4px solid var(--border-color);
+  color: var(--border-color);
+  border-radius: 50%;
+  padding: 16px;
   margin-bottom: 16px;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+.resolution-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.resolution-detail {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.claim-payout-btn {
+  font-size: 1.2rem;
+  padding: 16px 32px;
 }
 
 .bet-error {
   color: var(--accent-red);
-  font-size: 0.85rem;
-  margin-top: 8px;
+  background: #FFF0F0;
+  border: 2px solid var(--accent-red);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+
+.bet-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-green);
+  font-weight: 800;
+  padding: 16px;
+  margin-bottom: 24px;
 }

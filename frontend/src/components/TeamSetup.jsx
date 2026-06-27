@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createTeam, joinTeam } from "../api";
+import { Users, PlusCircle, ArrowLeft, Gamepad2 } from "lucide-react";
 import "./TeamSetup.css";
 
 export default function TeamSetup({ wallet, market, onRefresh }) {
@@ -41,19 +42,24 @@ export default function TeamSetup({ wallet, market, onRefresh }) {
 
   if (mode === "create") {
     return (
-      <div className="bettor-container">
-        <div className="setup-screen animate-fade-in">
+      <div className="bettor-container setup-layout">
+        <div className="brutal-card setup-screen animate-fade-in">
           <button className="btn-back" onClick={() => { setMode(null); setError(null); }} disabled={pending}>
-            ← Back
+            <ArrowLeft size={18} /> BACK
           </button>
-          <h2 className="setup-title">Create a Team</h2>
+          
+          <div className="setup-icon animate-float" style={{ background: "var(--accent-pink)" }}>
+            <PlusCircle size={48} />
+          </div>
+          
+          <h2 className="setup-title">CREATE A TEAM</h2>
           <p className="setup-subtitle">You'll be the first member of this team.</p>
           
           <form className="setup-form" onSubmit={handleCreate}>
             <input
               type="text"
-              className="setup-input"
-              placeholder="Team Name"
+              className="brutal-input"
+              placeholder="ENTER TEAM NAME"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
               disabled={pending}
@@ -66,7 +72,7 @@ export default function TeamSetup({ wallet, market, onRefresh }) {
               className="btn btn-primary setup-submit"
               disabled={pending || !teamName.trim()}
             >
-              {pending ? <><span className="spinner"/> Creating...</> : "Create Team"}
+              {pending ? <><span className="spinner"/> CREATING...</> : "CREATE TEAM"}
             </button>
           </form>
         </div>
@@ -76,12 +82,17 @@ export default function TeamSetup({ wallet, market, onRefresh }) {
 
   if (mode === "join") {
     return (
-      <div className="bettor-container">
-        <div className="setup-screen animate-fade-in">
+      <div className="bettor-container setup-layout">
+        <div className="brutal-card setup-screen animate-fade-in">
           <button className="btn-back" onClick={() => { setMode(null); setError(null); }} disabled={pending}>
-            ← Back
+            <ArrowLeft size={18} /> BACK
           </button>
-          <h2 className="setup-title">Join a Team</h2>
+          
+          <div className="setup-icon animate-float" style={{ background: "var(--accent-cyan)" }}>
+            <Users size={48} />
+          </div>
+          
+          <h2 className="setup-title">JOIN A TEAM</h2>
           <p className="setup-subtitle">Select an existing team to join.</p>
           
           <form className="setup-form" onSubmit={handleJoin}>
@@ -106,7 +117,7 @@ export default function TeamSetup({ wallet, market, onRefresh }) {
               className="btn btn-primary setup-submit"
               disabled={pending || selectedTeamId === ""}
             >
-              {pending ? <><span className="spinner"/> Joining...</> : "Join Team"}
+              {pending ? <><span className="spinner"/> JOINING...</> : "JOIN TEAM"}
             </button>
           </form>
         </div>
@@ -115,24 +126,29 @@ export default function TeamSetup({ wallet, market, onRefresh }) {
   }
 
   return (
-    <div className="bettor-container">
-      <div className="setup-screen animate-fade-in">
-        <div className="setup-icon">🤝</div>
-        <h1 className="setup-title">Join the Game</h1>
+    <div className="bettor-container setup-layout">
+      <div className="brutal-card setup-screen animate-fade-in">
+        <div className="setup-icon animate-float" style={{ background: "var(--accent-amber)" }}>
+          <Gamepad2 size={48} />
+        </div>
+        
+        <h1 className="setup-title">JOIN THE GAME</h1>
         <p className="setup-subtitle">
           To start betting, you must belong to a team. You cannot bet on your own team.
         </p>
 
         <div className="setup-actions">
           <button className="btn btn-primary setup-action-btn" onClick={() => setMode("create")}>
-            Create a New Team
+            <PlusCircle size={20} /> CREATE A NEW TEAM
           </button>
           {hasTeams ? (
             <button className="btn btn-secondary setup-action-btn" onClick={() => setMode("join")}>
-              Join Existing Team
+              <Users size={20} /> JOIN EXISTING TEAM
             </button>
           ) : (
-            <p className="setup-note">No teams exist yet. Create one!</p>
+            <div className="setup-note">
+              No teams exist yet. Create one!
+            </div>
           )}
         </div>
       </div>

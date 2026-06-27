@@ -1,119 +1,159 @@
-.team-card {
+.brutal-team-card {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 16px 18px;
   background: var(--team-bg);
-  border: 1px solid var(--team-border);
+  border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-md);
+  padding: 16px 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  animation: fadeIn 0.4s ease-out both;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.team-card:hover:not(.team-card-resolved) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-  border-color: var(--team-accent);
-}
-
-.team-card:active:not(.team-card-resolved) {
-  transform: translateY(0);
-}
-
-.team-card-resolved {
-  cursor: default;
-  opacity: 0.6;
-}
-
-.team-card-winner {
-  opacity: 1 !important;
-  border-color: var(--accent-green) !important;
-  box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
-}
-
-/* Left side */
-.team-card-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-
-.team-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  white-space: nowrap;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-btn);
+  animation: slideUp 0.4s ease-out backwards;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.team-pool {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.team-pool-value {
-  font-weight: 600;
   color: var(--text-primary);
 }
 
+.brutal-team-card:hover:not(.resolved) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--shadow-color);
+}
+
+.brutal-team-card:active:not(.resolved) {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px var(--shadow-color);
+}
+
+.brutal-team-card.resolved {
+  opacity: 0.7;
+  cursor: default;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+.brutal-team-card.own-team {
+  background: var(--bg-primary);
+  border-style: dashed;
+}
+
+.brutal-team-card.winner {
+  opacity: 1;
+  background: var(--accent-green);
+  border-color: var(--border-color);
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0px var(--shadow-color);
+  z-index: 10;
+}
+
+.team-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.team-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.team-pool-box {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.team-pool-value {
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
 .team-pool-label {
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.8;
 }
 
 .team-user-bet {
-  font-size: 0.75rem;
-  color: var(--team-accent);
-  font-weight: 600;
-  margin-top: 2px;
+  display: inline-block;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: 2px 2px 0px var(--shadow-color);
+  width: fit-content;
+  margin-top: 4px;
 }
 
-/* Right side */
+.team-user-bet span {
+  color: var(--accent-red);
+  font-size: 0.9rem;
+}
+
+.team-own-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #E5E7EB;
+  border: 2px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+  margin-top: 4px;
+}
+
 .team-card-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
+  justify-content: center;
+  gap: 8px;
+  min-width: 80px;
 }
 
-.team-odds {
-  font-size: 1.4rem;
+.team-odds-box {
+  font-size: 1.5rem;
   font-weight: 800;
-  line-height: 1;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  box-shadow: 2px 2px 0px var(--shadow-color);
 }
 
 .team-bar-container {
-  width: 80px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
+  width: 100px;
+  height: 12px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-pill);
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .team-bar {
   height: 100%;
-  border-radius: 2px;
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--text-primary);
+  border-right: 2px solid var(--border-color);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .team-winner-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--accent-green);
-}
-
-.team-own-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-style: italic;
-  margin-top: 2px;
-}
-
-.team-card-own {
-  border-style: dashed;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-amber);
+  border: 2px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 2px 2px 0px var(--shadow-color);
+  margin-top: 4px;
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import TeamCard from "./TeamCard";
 import BetModal from "./BetModal";
 import { placeBet, claimPayout } from "../api";
+import { Sparkles, Dice5, Wallet, Coins, ArrowRight, CheckCircle2, Frown, Trophy } from "lucide-react";
 import "./BettorView.css";
 
 export default function BettorView({
@@ -22,11 +23,14 @@ export default function BettorView({
   // ── Wallet Claim Screen ────────────────────────────────────────
   if (!wallet) {
     return (
-      <div className="bettor-container">
-        <div className="claim-screen animate-fade-in">
-          <div className="claim-icon">🎲</div>
+      <div className="bettor-container claim-layout">
+        <div className="brutal-card claim-screen animate-fade-in">
+          <div className="claim-icon animate-float">
+            <Dice5 size={64} strokeWidth={1.5} color="var(--accent-purple)" />
+          </div>
           <h1 className="claim-title">
-            <span className="gradient-text">Prediction Market</span>
+            HACKATHON<br/>
+            <span style={{ color: "var(--accent-red)" }}>PREDICTION</span>
           </h1>
           <p className="claim-subtitle">
             Bet on which team will win the audience vote!
@@ -39,17 +43,19 @@ export default function BettorView({
             {claimingWallet ? (
               <>
                 <span className="spinner" />
-                Getting your wallet...
+                GETTING WALLET...
               </>
             ) : (
-              "Get My Wallet"
+              <>
+                <Wallet size={20} /> GET MY WALLET <ArrowRight size={20} />
+              </>
             )}
           </button>
-          {claimError && <p className="claim-error">{claimError}</p>}
-          <p className="claim-note">
-            You'll receive a demo wallet with play-money tokens to bet with.
-            No real money involved!
-          </p>
+          {claimError && <div className="bet-error">{claimError}</div>}
+          <div className="claim-note">
+            <Sparkles size={16} /> 
+            You'll receive a demo wallet with play-money tokens. No real money involved!
+          </div>
         </div>
       </div>
     );
@@ -110,10 +116,9 @@ export default function BettorView({
     <div className="bettor-container">
       {/* Header */}
       <header className="bettor-header animate-fade-in">
-        <h1 className="bettor-title">
-          <span className="gradient-text">Prediction Market</span>
-        </h1>
-        <div className="wallet-info glass">
+        <h1 className="bettor-title">PREDICTION MARKET</h1>
+        <div className="wallet-info brutal-card">
+          <Wallet size={16} />
           <div className="wallet-address" title={wallet.address}>
             {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
           </div>
@@ -121,15 +126,18 @@ export default function BettorView({
       </header>
 
       {/* Balance Card */}
-      <div className="balance-card glass animate-slide-up">
+      <div className="brutal-card balance-card">
         <div className="balance-row">
           <div className="balance-item">
-            <span className="balance-label">Available</span>
-            <span className="balance-value">{userBalance?.balance ?? "..."}</span>
+            <span className="balance-label">AVAILABLE</span>
+            <span className="balance-value">
+              <Coins size={24} color="var(--accent-amber)" />
+              {userBalance?.balance ?? "..."}
+            </span>
           </div>
           <div className="balance-divider" />
           <div className="balance-item">
-            <span className="balance-label">Total Staked</span>
+            <span className="balance-label">TOTAL STAKED</span>
             <span className="balance-value balance-staked">{totalBet}</span>
           </div>
         </div>
@@ -137,11 +145,11 @@ export default function BettorView({
 
       {/* Resolution Banner */}
       {isResolved && (
-        <div className={`resolution-banner animate-slide-up ${userWinningBet ? "resolution-win" : "resolution-lose"}`}>
+        <div className={`brutal-card resolution-banner ${userWinningBet ? "resolution-win" : "resolution-lose"}`}>
           {userWinningBet && !hasClaimed ? (
             <>
-              <div className="resolution-emoji">🎉</div>
-              <h2>You won!</h2>
+              <div className="resolution-emoji"><Trophy size={48} /></div>
+              <h2 className="resolution-title">YOU WON!</h2>
               <p className="resolution-detail">
                 Your payout: <strong>{expectedPayout}</strong> tokens
               </p>
@@ -151,12 +159,9 @@ export default function BettorView({
                 disabled={claimPending}
               >
                 {claimPending ? (
-                  <>
-                    <span className="spinner" />
-                    Claiming...
-                  </>
+                  <><span className="spinner" /> CLAIMING...</>
                 ) : (
-                  "Claim Payout"
+                  "CLAIM PAYOUT"
                 )}
               </button>
               {claimResult?.success === false && (
@@ -165,16 +170,16 @@ export default function BettorView({
             </>
           ) : hasClaimed ? (
             <>
-              <div className="resolution-emoji">✅</div>
-              <h2>Payout Claimed!</h2>
+              <div className="resolution-emoji"><CheckCircle2 size={48} /></div>
+              <h2 className="resolution-title">PAYOUT CLAIMED</h2>
               <p className="resolution-detail">
                 {expectedPayout} tokens added to your balance.
               </p>
             </>
           ) : (
             <>
-              <div className="resolution-emoji">😔</div>
-              <h2>Better luck next time!</h2>
+              <div className="resolution-emoji"><Frown size={48} /></div>
+              <h2 className="resolution-title">BETTER LUCK NEXT TIME!</h2>
               <p className="resolution-detail">
                 {market.teams[winningTeamId]?.name} won the vote.
               </p>
@@ -185,16 +190,21 @@ export default function BettorView({
 
       {/* Success Toast */}
       {betResult?.success && (
-        <div className="bet-toast animate-slide-up">
-          ✅ Bet placed successfully!
+        <div className="brutal-card bet-toast">
+          <CheckCircle2 size={20} /> BET PLACED SUCCESSFULLY!
         </div>
       )}
 
       {/* Teams List */}
       <div className="teams-section">
-        <h2 className="section-title">
-          {isResolved ? "Final Results" : "Place Your Bets"}
-        </h2>
+        <div className="section-header">
+          <Sparkles size={24} color="var(--accent-pink)" className="animate-float" />
+          <h2 className="section-title">
+            {isResolved ? "FINAL RESULTS" : "PLACE YOUR BETS"}
+          </h2>
+          <Sparkles size={24} color="var(--accent-cyan)" className="animate-float" style={{ animationDelay: "1s" }} />
+        </div>
+        
         <div className="teams-list">
           {market?.teams?.map((team, i) => (
             <TeamCard
@@ -211,8 +221,8 @@ export default function BettorView({
           ))}
         </div>
         {!market && (
-          <div className="loading-state animate-pulse">
-            Loading market data...
+          <div className="loading-state">
+            <span className="spinner" /> LOADING MARKET...
           </div>
         )}
       </div>

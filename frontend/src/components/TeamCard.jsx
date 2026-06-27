@@ -1,12 +1,13 @@
 import "./TeamCard.css";
+import { Star, AlertOctagon } from "lucide-react";
 
 const TEAM_COLORS = [
-  { bg: "rgba(168, 85, 247, 0.12)", border: "rgba(168, 85, 247, 0.25)", accent: "#a855f7" },
-  { bg: "rgba(34, 211, 238, 0.12)", border: "rgba(34, 211, 238, 0.25)", accent: "#22d3ee" },
-  { bg: "rgba(251, 191, 36, 0.12)", border: "rgba(251, 191, 36, 0.25)", accent: "#fbbf24" },
-  { bg: "rgba(52, 211, 153, 0.12)", border: "rgba(52, 211, 153, 0.25)", accent: "#34d399" },
-  { bg: "rgba(248, 113, 113, 0.12)", border: "rgba(248, 113, 113, 0.25)", accent: "#f87171" },
-  { bg: "rgba(129, 140, 248, 0.12)", border: "rgba(129, 140, 248, 0.25)", accent: "#818cf8" },
+  { bg: "var(--accent-pink)" },
+  { bg: "var(--accent-cyan)" },
+  { bg: "var(--accent-amber)" },
+  { bg: "var(--accent-green)" },
+  { bg: "var(--accent-red)" },
+  { bg: "var(--accent-purple)" },
 ];
 
 export default function TeamCard({
@@ -25,11 +26,9 @@ export default function TeamCard({
 
   return (
     <div
-      className={`team-card ${isResolved || isOwnTeam ? "team-card-resolved" : ""} ${isWinner ? "team-card-winner" : ""} ${isOwnTeam ? "team-card-own" : ""}`}
+      className={`brutal-team-card ${isResolved || isOwnTeam ? "resolved" : ""} ${isWinner ? "winner" : ""} ${isOwnTeam ? "own-team" : ""}`}
       style={{
         "--team-bg": color.bg,
-        "--team-border": color.border,
-        "--team-accent": color.accent,
         animationDelay: `${animDelay}s`,
       }}
       onClick={!isResolved && !isOwnTeam ? onClick : undefined}
@@ -38,36 +37,37 @@ export default function TeamCard({
     >
       <div className="team-card-left">
         <div className="team-name">{team.name}</div>
-        <div className="team-pool">
+        <div className="team-pool-box">
           <span className="team-pool-value">{team.pool}</span>
-          <span className="team-pool-label"> staked</span>
+          <span className="team-pool-label">STAKED</span>
         </div>
         {userBet > 0 && (
           <div className="team-user-bet">
-            Your bet: {userBet}
+            BET: <span>{userBet}</span>
           </div>
         )}
         {isOwnTeam && (
           <div className="team-own-label">
-            Your team — can't bet here
+            <AlertOctagon size={14} /> YOUR TEAM (NO BETS)
           </div>
         )}
       </div>
 
       <div className="team-card-right">
-        <div className="team-odds" style={{ color: color.accent }}>
+        <div className="team-odds-box">
           {oddsDisplay}
         </div>
         <div className="team-bar-container">
           <div
             className="team-bar"
-            style={{
-              width: `${Math.max(poolPercent, 2)}%`,
-              background: color.accent,
-            }}
+            style={{ width: `${Math.max(poolPercent, 2)}%` }}
           />
         </div>
-        {isWinner && <div className="team-winner-badge">🏆 Winner</div>}
+        {isWinner && (
+          <div className="team-winner-badge">
+            <Star size={16} fill="black" /> WINNER
+          </div>
+        )}
       </div>
     </div>
   );
