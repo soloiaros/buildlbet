@@ -4,7 +4,13 @@ import { X } from "lucide-react";
 
 export default function QRScanner({ onScan, onClose }) {
   const scannerRef = useRef(null);
+  const onScanRef = useRef(onScan);
+  const scannedRef = useRef(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    onScanRef.current = onScan;
+  }, [onScan]);
 
   useEffect(() => {
     if (scannerRef.current) return;
@@ -25,10 +31,11 @@ export default function QRScanner({ onScan, onClose }) {
         }
       },
       (decodedText) => {
-        // Prevent multiple scans by checking a local flag or just stopping
-        html5QrCode.stop().then(() => {
-          onScan(decodedText);
-        }).catch(console.error);
+        if (scannedRef.current) return;
+        scannedRef.current = true;
+        // Don't call stop() here to avoid race conditions with unmount cleanup.
+        // Just trigger the onScan prop and let the parent unmount this component.
+        onScanRef.current(decodedText);
       },
       (error) => {
         // ignore stream errors, they happen on every frame without a QR code
@@ -49,7 +56,7 @@ export default function QRScanner({ onScan, onClose }) {
         });
       }
     };
-  }, [onScan]);
+  }, []);
 
   return (
     <div style={{
