@@ -9,42 +9,36 @@ export default function QRScanner({ onScan, onClose }) {
   useEffect(() => {
     if (scannerRef.current) return;
 
-    const timer = setTimeout(() => {
-      if (scannerRef.current) return;
-      
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      scannerRef.current = html5QrCode;
+    const html5QrCode = new Html5Qrcode("qr-reader");
+    scannerRef.current = html5QrCode;
 
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: (viewfinderWidth, viewfinderHeight) => {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            return {
-              width: Math.floor(minEdge * 0.7),
-              height: Math.floor(minEdge * 0.7)
-            };
-          }
-        },
-        (decodedText) => {
-          // Prevent multiple scans by checking a local flag or just stopping
-          html5QrCode.stop().then(() => {
-            onScan(decodedText);
-          }).catch(console.error);
-        },
-        (error) => {
-          // ignore stream errors, they happen on every frame without a QR code
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+          return {
+            width: Math.floor(minEdge * 0.7),
+            height: Math.floor(minEdge * 0.7)
+          };
         }
-      ).catch((err) => {
-        console.error("Camera start failed", err);
-        setErrorMsg("Failed to start camera. Please ensure you have granted camera permissions.");
-      });
-      
-    }, 50);
+      },
+      (decodedText) => {
+        // Prevent multiple scans by checking a local flag or just stopping
+        html5QrCode.stop().then(() => {
+          onScan(decodedText);
+        }).catch(console.error);
+      },
+      (error) => {
+        // ignore stream errors, they happen on every frame without a QR code
+      }
+    ).catch((err) => {
+      console.error("Camera start failed", err);
+      setErrorMsg("Failed to start camera. Please ensure you have granted camera permissions.");
+    });
 
     return () => {
-      clearTimeout(timer);
       if (scannerRef.current) {
         scannerRef.current.stop().then(() => {
           scannerRef.current.clear();
@@ -83,7 +77,7 @@ export default function QRScanner({ onScan, onClose }) {
             {errorMsg}
           </div>
         )}
-        <div id="qr-reader" style={{ width: "100%", border: "4px solid black", background: "white" }}></div>
+        <div id="qr-reader" style={{ width: "100%", minHeight: "300px", border: "4px solid black", background: "white" }}></div>
       </div>
     </div>
   );
