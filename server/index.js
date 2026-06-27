@@ -34,12 +34,22 @@ if (!fs.existsSync(deploymentPath)) {
 const deployment = JSON.parse(fs.readFileSync(deploymentPath, "utf8"));
 
 // Load demo wallets
-const walletsPath = path.join(__dirname, "..", "contracts", "demo-wallets.json");
-if (!fs.existsSync(walletsPath)) {
-  console.error("❌ contracts/demo-wallets.json not found. Run: cd contracts && npm run generate-wallets");
-  process.exit(1);
+let demoWallets = [];
+if (process.env.DEMO_WALLETS_JSON) {
+  try {
+    demoWallets = JSON.parse(process.env.DEMO_WALLETS_JSON);
+  } catch (err) {
+    console.error("❌ Failed to parse DEMO_WALLETS_JSON:", err.message);
+    process.exit(1);
+  }
+} else {
+  const walletsPath = path.join(__dirname, "..", "contracts", "demo-wallets.json");
+  if (!fs.existsSync(walletsPath)) {
+    console.error("❌ contracts/demo-wallets.json not found. Run: cd contracts && npm run generate-wallets");
+    process.exit(1);
+  }
+  demoWallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
 }
-const demoWallets = JSON.parse(fs.readFileSync(walletsPath, "utf8"));
 
 // ── Setup ethers ────────────────────────────────────────────────────────
 
