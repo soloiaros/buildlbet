@@ -1,0 +1,108 @@
+.team-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: var(--team-bg);
+  border: 1px solid var(--team-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: fadeIn 0.4s ease-out both;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.team-card:hover:not(.team-card-resolved) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  border-color: var(--team-accent);
+}
+
+.team-card:active:not(.team-card-resolved) {
+  transform: translateY(0);
+}
+
+.team-card-resolved {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.team-card-winner {
+  opacity: 1 !important;
+  border-color: var(--accent-green) !important;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+}
+
+/* Left side */
+.team-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.team-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-pool {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.team-pool-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.team-pool-label {
+  color: var(--text-muted);
+}
+
+.team-user-bet {
+  font-size: 0.75rem;
+  color: var(--team-accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Right side */
+.team-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.team-odds {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.team-bar-container {
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.team-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.team-winner-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}

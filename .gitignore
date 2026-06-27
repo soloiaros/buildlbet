@@ -1,0 +1,11 @@
+node_modules/
+.env
+contracts/demo-wallets.json
+contracts/deployment.json
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+frontend/dist/
+frontend/node_modules/
+server/node_modules/
+.DS_Store
